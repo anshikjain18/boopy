@@ -1,0 +1,7 @@
+README.md
+setup.py
+bootstrapy/__init__.py
+bootstrapy.egg-info/PKG-INFO
+bootstrapy.egg-info/SOURCES.txt
+bootstrapy.egg-info/dependency_links.txt
+bootstrapy.egg-info/top_level.txt
