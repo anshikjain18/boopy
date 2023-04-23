@@ -1,6 +1,6 @@
 import datetime
 from dateutil import easter # Only needed for Easter Monday
-from utils import is_weekend, calc_day_of_year
+from bootstrapy.time.calendars.utils import is_weekend, calc_day_of_year
 
 def sweden_is_business_day(arg_date : datetime.date) -> bool:
     weekday = arg_date.weekday()
