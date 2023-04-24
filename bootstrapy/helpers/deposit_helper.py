@@ -1,31 +1,14 @@
-class DepositHelper:
-    def __init__(
-        self, 
-        maturity : int, # Convert to string
-        compounding : str, 
-        rate: float,
-        daycount: str):
+from bootstrapy.helpers.interest_rate_helper import InterestRateHelper
+from bootstrapy.time.date.maturity import initialize_maturity_date, maturity_datetime, maturity_int
+import bootstrapy.time.date.reference_date as reference_date_holder
+class DepositHelper(InterestRateHelper):
+    def __init__(self, maturity_input : str, settlement_date: int):
+        self.timeunit = maturity_input[-1]
+        self.length = int(maturity_input[:len(maturity_input)-1])
+        self.maturity_date = maturity_datetime(
+            initialize_maturity_date(reference_date_holder.reference_date, self.timeunit, self.length),
+            settlement_date
+            )
+        self.maturity_days =  maturity_int(reference_date_holder.reference_date, self.maturity_date)
 
-        self.maturity = maturity
-        self.compounding = compounding
-        self.rate = rate
-        self.daycount = daycount
-
-    def rate(self):
-        if self.compounding == "Continuous":
-            raise NotImplementedError
-        elif self.compounding == "Annual": # Consider discrete compounding instead
-            raise NotImplementedError
-        elif self.compounding == "Simple":
-            raise NotImplementedError
-        else:
-            raise TypeError("Deposit compounding is not set correctly.")
         
-    def continuous_rate(self):
-        raise NotImplementedError
-    
-    def simple_rate(self):
-        raise NotImplementedError
-    
-    def discrete_compounding(self):
-        raise NotImplementedError
