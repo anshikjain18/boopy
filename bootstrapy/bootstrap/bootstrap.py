@@ -1,7 +1,7 @@
 from typing import List, Type, Callable
 from bootstrapy.helpers.interest_rate_helper import InterestRateHelper
 import bootstrapy.time.date.reference_date as reference_date_holder
-from bisect import bisect_right
+from bisect import bisect_left
 class Bootstrap:
     def __init__(self, 
                  instruments : List[Type[InterestRateHelper]], 
@@ -9,9 +9,14 @@ class Bootstrap:
                  ):
         self.day_counter = day_counter
         self.pillars = self._curve_pillars(instruments)
+
+        self.curve = len(self.pillars) * [0.5]
+
+        # Interpolation
         self.x_begin = self.pillars[0]
         self.x_end = self.pillars[-1]
-        self.curve = len(self.pillars) * [0.5]
+        self.y_begin = self.curve
+        self.s_ = self.curve # temporary solution
     def _curve_pillars(self, instruments : List[Type[InterestRateHelper]]) -> List[int]:
         """
         Fetches the maturity days of the instruments and also inserts the reference date into a list. 
@@ -29,7 +34,7 @@ class Bootstrap:
             pillars[i] = self.day_counter(pillars[0],instrument.maturity_days)
         return pillars
 
-    def _update(self, x_begin : List[float], x_end : float, y_begin : float):
+    def _update(self, x : float ) -> None:
         """
         Calculates the quota (y(x1)-y(x0)/(x1-x0)) a given point on the curve based on the interpolation method. 
         
@@ -41,14 +46,32 @@ class Bootstrap:
         ----------
         
         """
-        pass
+        length = len(self.x_begin) - len(self.x_end)
+        for i in range(1,length):
+            dx = self.x_begin[i] - self.x_begin[i-1]
+            self.s_[i-1] = (self.y_begin[i] - self.y_begin[i-1]) /dx
     
-    def _value(self, x_begin : float, x_end : float, y_begin : float):
-        pass
+    def _value(self, x: float):
+        """
+        Given a x it will locate the nearest pillar using the corresponding version of upper_bound in python which is
+        left_bisect. Then it will use the curve value for that pillar to interpolate. 
+
+        Reference
+        ---------
+        linearinterpolation.hpp
+        
+        Parameters
+        ----------
+        x : float 
+            The pillar to find the interpolated value for, it can also be value date. 
+        """
+        i = self._locate(x)
+        return self.y_begin[i] + (x - self.x_begin[i]) * self.s_[i]
+
 
     def _locate(self, x: float) -> int:
         """
-        Given a x, it will locate the correct index in the corresponding yBegin and x_begin arrays.
+        Given a x, it will locate the correct index in the corresponding x_begin array.
         
         Example
         -------
@@ -70,7 +93,7 @@ class Bootstrap:
         x_end: float
             The 
         """
-        index_end = bisect_right(self.pillars, x)+1
+        index_end = bisect_left(self.pillars, x)+1
         x_ahead_end = self.pillars[index_end -1]
         if (x < self.x_begin):
             return 0
@@ -79,7 +102,7 @@ class Bootstrap:
             #return self.x_end-self.x_begin-2
         else:
             # https://stackoverflow.com/a/37873955
-            return bisect_right(self.pillars, x) - self.x_begin-1
+            return bisect_left(self.pillars, x) - self.x_begin-1
     def calculate(self):
         """
         When called will extend the curve pillar at a time with each new instrument.
