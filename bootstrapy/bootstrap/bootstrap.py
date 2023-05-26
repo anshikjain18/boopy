@@ -2,6 +2,7 @@ from typing import List, Type, Callable
 from bootstrapy.helpers.interest_rate_helper import InterestRateHelper
 import bootstrapy.time.date.reference_date as reference_date_holder
 from bisect import bisect_left
+import datetime
 class Bootstrap:
     def __init__(self, 
                  instruments : List[Type[InterestRateHelper]], 
@@ -17,6 +18,17 @@ class Bootstrap:
         self.x_end = self.pillars[-1]
         self.y_begin = self.curve
         self.s_ = self.curve # temporary solution
+    def discount(d : datetime.date) -> float:
+        """
+         
+        References
+        ----------
+
+        Parameters
+        ----------
+        
+        """
+        pass
     def _curve_pillars(self, instruments : List[Type[InterestRateHelper]]) -> List[int]:
         """
         Fetches the maturity days of the instruments and also inserts the reference date into a list. 

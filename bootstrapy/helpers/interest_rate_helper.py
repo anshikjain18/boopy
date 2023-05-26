@@ -1,12 +1,11 @@
+
+
+
+
 class InterestRateHelper:
     def __init__(
         self, 
-        maturity : str, # Convert to string
-        compounding : str, 
-        rate: float,
-        daycount: str):
+        quote: float
+    ):
+        self.quote = quote
 
-        self.maturity = maturity
-        self.compounding = compounding
-        self.rate = rate
-        self.daycount = daycount

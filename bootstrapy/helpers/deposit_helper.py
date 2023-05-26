@@ -3,7 +3,8 @@ from bootstrapy.time.date.maturity import initialize_maturity_date, maturity_dat
 import bootstrapy.time.date.reference_date as reference_date_holder
 from bootstrapy.time.calendars.calendar import advance
 # types
-from typing import Callable
+from typing import Callable, List
+import datetime
 class DepositHelper(InterestRateHelper):
     def __init__(self, 
                  maturity_input : str, 
@@ -22,6 +23,26 @@ class DepositHelper(InterestRateHelper):
         self.value_days = maturity_int(reference_date_holder.reference_date, self.value_date)
         # ? Should just be inserted to the function implied quote
         #self.daycount_time = daycounter(self.value_days, self.maturity_days)
+    def forecast_fixing(
+            d1: datetime.date, 
+            d2: datetime.date,
+            t: float,
+            term_structure:List[float]) -> float:
+            """
+            Calculates the forward rate using d1 and d2.
+
+            References
+            ----------
+            Calls discountImpl which will return exp(-r*t). However first r is calculated through calling value from interpolation.
+                iborindex.hpp
+
+            Parameters
+            ----------
+            
+            """
+            df_1 = val 
+            df_2 = 
+            return (df_1/df_2-1) / t
     def implied_quote(self):
         raise NotImplementedError
 
