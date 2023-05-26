@@ -40,9 +40,7 @@ class DepositHelper(InterestRateHelper):
             ----------
             
             """
-            df_1 = val 
-            df_2 = 
-            return (df_1/df_2-1) / t
+            pass
     def implied_quote(self):
         raise NotImplementedError
 

@@ -3,6 +3,7 @@ from bootstrapy.helpers.interest_rate_helper import InterestRateHelper
 import bootstrapy.time.date.reference_date as reference_date_holder
 from bisect import bisect_left
 import datetime
+import numpy as np
 class Bootstrap:
     def __init__(self, 
                  instruments : List[Type[InterestRateHelper]], 
@@ -17,18 +18,48 @@ class Bootstrap:
         self.x_begin = self.pillars[0]
         self.x_end = self.pillars[-1]
         self.y_begin = self.curve
-        self.s_ = self.curve # temporary solution
-    def discount(d : datetime.date) -> float:
+        # TODO: Temporary solution
+        self.s_ = self.curve 
+    def discount(self, 
+                 d : datetime.time,
+                 instrument : Callable) -> float:
         """
-         
+        Considers jumpTimes and such. However, we will skip it for now and just call discountImpl directly. 
         References
         ----------
+        yieldtermstructure.cpp
+        zeroyieldstructure.hpp
 
         Parameters
         ----------
         
         """
-        pass
+        t = instrument.year_fraction(None, d)
+        r = self._value(t)
+        return np.exp(-r*t)
+    
+    # TODO: create a better solution for forecast_fixing, should be inside deposit_helper
+    def forecast_fixing(
+            self,
+            d1: datetime.date, 
+            d2: datetime.date,
+            t: float,
+            instrument: Callable) -> float:
+            """
+            Calculates the forward rate using d1 and d2.
+
+            References
+            ----------
+            Calls discountImpl which will return exp(-r*t). However first r is calculated through calling value from interpolation.
+                iborindex.hpp
+
+            Parameters
+            ----------
+            
+            """
+            df_1 = self.discount(d1, instrument)
+            df_2 = self.discount(d2, instrument)
+            return (df_1/df_2-1)/t
     def _curve_pillars(self, instruments : List[Type[InterestRateHelper]]) -> List[int]:
         """
         Fetches the maturity days of the instruments and also inserts the reference date into a list. 
