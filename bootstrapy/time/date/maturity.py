@@ -1,6 +1,8 @@
 from bootstrapy.time.calendars.sweden import sweden_is_business_day
 import datetime
 from dateutil.relativedelta import relativedelta
+import bootstrapy.time.date.reference_date as reference_date_holder
+
 def initialize_maturity_date(reference_date: datetime.date, timeunit : str, length : int) -> datetime.date:
     """
     Calculates the maturity date without considering if the maturity date is a business date or not.    
@@ -49,4 +51,10 @@ def maturity_datetime(init_maturity_date : datetime.date,
         maturity_date_iter= maturity_date_iter+ datetime.timedelta(days = 1)
 
 def maturity_int(reference_date: datetime.date, maturity_date: datetime.date) -> int:
-    return (maturity_date- reference_date).days
+    return (maturity_date - reference_date).days
+
+def time_from_reference(d1 : datetime.date | None, d2: datetime.date) -> int:
+    if d1 == None:
+        return (d2 - reference_date_holder.reference_date).days
+    else:
+        return (d2 - d1).days

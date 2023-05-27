@@ -11,6 +11,7 @@ class DepositHelper(InterestRateHelper):
                  settlement_input: int, 
                  daycounter: Callable[[int, int], float]
                  ):
+        super().__init__(daycounter)
         self.timeunit = maturity_input[-1]
         self.length = int(maturity_input[:len(maturity_input)-1])
         self.maturity_date = maturity_datetime(

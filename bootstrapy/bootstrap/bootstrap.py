@@ -1,28 +1,30 @@
 from typing import List, Type, Callable
 from bootstrapy.helpers.interest_rate_helper import InterestRateHelper
-import bootstrapy.time.date.reference_date as reference_date_holder
+from bootstrapy.time.date.maturity import time_from_reference
 from bisect import bisect_left
 import datetime
 import numpy as np
+
+
 class Bootstrap:
     def __init__(self, 
                  instruments : List[Type[InterestRateHelper]], 
                  day_counter : Callable[[int, int], float]
                  ):
+        self.instruments = instruments
         self.day_counter = day_counter
         self.pillars = self._curve_pillars(instruments)
 
-        self.curve = len(self.pillars) * [0.5]
+        self.curve = [-1, -1, -1]#len(self.pillars) * [0.5]
 
         # Interpolation
-        self.x_begin = self.pillars[0]
+        self.x_begin = self.pillars
         self.x_end = self.pillars[-1]
         self.y_begin = self.curve
         # TODO: Temporary solution
         self.s_ = self.curve 
-    def discount(self, 
-                 d : datetime.time,
-                 instrument : Callable) -> float:
+    def _discount(self, 
+                 d : datetime.time) -> float:
         """
         Considers jumpTimes and such. However, we will skip it for now and just call discountImpl directly. 
         References
@@ -34,19 +36,20 @@ class Bootstrap:
         ----------
         
         """
-        t = instrument.year_fraction(None, d)
+        t = self.day_counter(0, time_from_reference(None, d))
         r = self._value(t)
+        print(f'{r = }')
         return np.exp(-r*t)
     
     # TODO: create a better solution for forecast_fixing, should be inside deposit_helper
-    def forecast_fixing(
+    def _forecast_fixing(
             self,
             d1: datetime.date, 
             d2: datetime.date,
-            t: float,
-            instrument: Callable) -> float:
+            t: float) -> float:
             """
-            Calculates the forward rate using d1 and d2.
+            Calculates the forward rate using d1 and d2. t is the time between d1 and d2 using the instruments
+            day count convention.
 
             References
             ----------
@@ -57,9 +60,10 @@ class Bootstrap:
             ----------
             
             """
-            df_1 = self.discount(d1, instrument)
-            df_2 = self.discount(d2, instrument)
+            df_1 = self._discount(d1)
+            df_2 = self._discount(d2)
             return (df_1/df_2-1)/t
+
     def _curve_pillars(self, instruments : List[Type[InterestRateHelper]]) -> List[int]:
         """
         Fetches the maturity days of the instruments and also inserts the reference date into a list. 
@@ -138,14 +142,15 @@ class Bootstrap:
         """
         index_end = bisect_left(self.pillars, x)+1
         x_ahead_end = self.pillars[index_end -1]
-        if (x < self.x_begin):
+        x_begin = self.x_begin[0]
+        if (x < x_begin):
             return 0
         elif (x > x_ahead_end):
             raise NotImplementedError
             #return self.x_end-self.x_begin-2
         else:
             # https://stackoverflow.com/a/37873955
-            return bisect_left(self.pillars, x) - self.x_begin-1
+            return bisect_left(self.pillars, x) - x_begin-1
     def calculate(self):
         """
         When called will extend the curve pillar at a time with each new instrument.
@@ -164,6 +169,14 @@ class Bootstrap:
         ----------
         
         """
+        # Replace below with a for loop
+        segment = 0
+        instrument = self.instruments[0]
+        value_date = instrument.value_date
+        maturity_date = instrument.maturity_date
+        t = instrument.year_fraction(value_date, maturity_date)
+        return self._forecast_fixing(value_date, maturity_date, t)
+
     def _order_instruments(self):
         """
         Orders the given instrument list of classes based on their maturity days.
@@ -174,4 +187,5 @@ class Bootstrap:
             A list of class instances of the instruments.
 
         """
+        
         pass 
