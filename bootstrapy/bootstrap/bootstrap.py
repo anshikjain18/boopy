@@ -22,7 +22,7 @@ class Bootstrap:
         self.x_end = self.pillars[-1]
         self.y_begin = self.curve
         # TODO: Temporary solution
-        self.s_ = self.curve 
+        self.s_ = len(self.curve ) * [0]
     def _discount(self, 
                  d : datetime.time) -> float:
         """
@@ -39,6 +39,7 @@ class Bootstrap:
         t = self.day_counter(0, time_from_reference(None, d))
         r = self._value(t)
         print(f'{r = }')
+        print(f'{t = }')
         return np.exp(-r*t)
     
     # TODO: create a better solution for forecast_fixing, should be inside deposit_helper
@@ -81,7 +82,7 @@ class Bootstrap:
             pillars[i] = self.day_counter(pillars[0],instrument.maturity_days)
         return pillars
 
-    def _update(self, x : float ) -> None:
+    def _update(self) -> None:
         """
         Calculates the quota (y(x1)-y(x0)/(x1-x0)) a given point on the curve based on the interpolation method. 
         
@@ -93,11 +94,10 @@ class Bootstrap:
         ----------
         
         """
-        length = len(self.x_begin) - len(self.x_end)
+        length = len(self.x_begin) - 1#len(self.x_end)
         for i in range(1,length):
             dx = self.x_begin[i] - self.x_begin[i-1]
-            self.s_[i-1] = (self.y_begin[i] - self.y_begin[i-1]) /dx
-    
+            self.s_[i-1] = (self.y_begin[i] - self.y_begin[i-1]) / dx
     def _value(self, x: float):
         """
         Given a x it will locate the nearest pillar using the corresponding version of upper_bound in python which is
@@ -175,8 +175,10 @@ class Bootstrap:
         value_date = instrument.value_date
         maturity_date = instrument.maturity_date
         t = instrument.year_fraction(value_date, maturity_date)
+        self._update()
         return self._forecast_fixing(value_date, maturity_date, t)
-
+    def bootstrap_error(self) -> float:
+        pass
     def _order_instruments(self):
         """
         Orders the given instrument list of classes based on their maturity days.
