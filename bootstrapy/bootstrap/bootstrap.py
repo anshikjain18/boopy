@@ -24,7 +24,8 @@ class Bootstrap:
         # TODO: Temporary solution
         self.s_ = len(self.curve ) * [0]
     def _discount(self, 
-                 d : datetime.time) -> float:
+                 d : datetime.time
+                 ) -> float:
         """
         Considers jumpTimes and such. However, we will skip it for now and just call discountImpl directly. 
         References
@@ -45,7 +46,8 @@ class Bootstrap:
             self,
             d1: datetime.date, 
             d2: datetime.date,
-            t: float) -> float:
+            t: float
+            ) -> float:
             """
             Calculates the forward rate using d1 and d2. t is the time between d1 and d2 using the instruments
             day count convention.
@@ -61,10 +63,11 @@ class Bootstrap:
             """
             df_1 = self._discount(d1)
             df_2 = self._discount(d2)
-            print((df_1/df_2-1)/t)
             return (df_1/df_2-1)/t
 
-    def _curve_pillars(self, instruments : List[Type[InterestRateHelper]]) -> List[int]:
+    def _curve_pillars(self, 
+                       instruments : List[Type[InterestRateHelper]]
+                       ) -> List[int]:
         """
         Fetches the maturity days of the instruments and also inserts the reference date into a list. 
         
@@ -151,15 +154,17 @@ class Bootstrap:
             # https://stackoverflow.com/a/37873955
             return bisect_left(self.pillars, x) - x_begin-1
     def bootstrap_error(self, 
-                            r : float,
-                            instrument : Callable,
-                            segment: int, 
-                            value_date: datetime.date,
-                            maturity_date: datetime.date,
-                            t : float):
+                        r : float,
+                        instrument : Callable,
+                        segment: int, 
+                        value_date: datetime.date,
+                        maturity_date: datetime.date,
+                        t : float
+                        ) -> float:
             self.curve[segment] = r
             if segment == 1:
                  self.curve[0] = self.curve[segment]
+            print(f'{self._forecast_fixing(value_date, maturity_date, t) = }')
             return instrument.quote - self._forecast_fixing(value_date, maturity_date, t)
     def calculate(self):
         """
@@ -193,9 +198,42 @@ class Bootstrap:
                             value_date = value_date,
                             maturity_date = maturity_date,
                             t = t)
-        optimize.root_scalar(lambda r: pre_solve(r =r), bracket=[-10, 10], method='brentq')
+        optimize.root_scalar(lambda r: pre_solve(r = r), bracket=[-10, 10], method='brentq')
         return self.curve
+    
+    def calculate2(self):
+        """
+        When called will extend the curve pillar at a time with each new instrument.
+        
+        Example
+        -------
+        Given the first instrument, a deposit. It will extend the curve with a single point.
+        Then for the next instrument, it will extend the curve with an additional point. Each
+        instrument forces the curve to call the solver and interpolate again.
 
+        Reference
+        ---------
+        iterativebootstrap.hpp
+        """
+        # ? Replace below with a for loop
+        for segment in range(1,len(self.instruments)+1):
+            print(f'{segment = }')
+            instrument = self.instruments[segment-1]
+            value_date = instrument.value_date
+            maturity_date = instrument.maturity_date
+            print(f'{value_date = }')
+            print(f'{maturity_date = }')
+            t = instrument.year_fraction(value_date, maturity_date)
+            self._update()
+
+            pre_solve = partial(self.bootstrap_error,
+                                instrument = instrument,
+                                segment = segment,
+                                value_date = value_date,
+                                maturity_date = maturity_date,
+                                t = t)
+            optimize.root_scalar(lambda r: pre_solve(r = r), bracket=[-1, 1], method='brentq')
+        return self.curve
     def _order_instruments(self):
         """
         Orders the given instrument list of classes based on their maturity days.
