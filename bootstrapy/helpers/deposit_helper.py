@@ -9,8 +9,8 @@ class DepositHelper(InterestRateHelper):
     def __init__(self, 
                  maturity_input : str, 
                  settlement_input: int, 
-                 daycounter: Callable[[int, int], float]
-                 ):
+                 daycounter: Callable[[int, int], float],
+                 quote: float):
         super().__init__(daycounter)
         self.timeunit = maturity_input[-1]
         self.length = int(maturity_input[:len(maturity_input)-1])
@@ -24,6 +24,7 @@ class DepositHelper(InterestRateHelper):
         self.value_days = maturity_int(reference_date_holder.reference_date, self.value_date)
         # ? Should just be inserted to the function implied quote
         #self.daycount_time = daycounter(self.value_days, self.maturity_days)
+        self.quote = quote
     def forecast_fixing(
             d1: datetime.date, 
             d2: datetime.date,

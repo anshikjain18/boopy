@@ -6,10 +6,9 @@ from bootstrapy.time.date.maturity import time_from_reference
 class InterestRateHelper:
     def __init__(
         self, 
-        day_count : Callable[[int, int], float]
+        day_count : Callable[[int, int], float],
     ):
         self.day_count = day_count
-    
     def year_fraction(self, d1 : datetime.date | None, d2: datetime.date) -> float:
         """
         Calculates the year fraction. If d1 is equal to d1, then assume it will be the

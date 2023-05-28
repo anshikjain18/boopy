@@ -4,8 +4,8 @@ from bootstrapy.time.date.maturity import time_from_reference
 from bisect import bisect_left
 import datetime
 import numpy as np
-
-
+from scipy import optimize
+from functools import partial
 class Bootstrap:
     def __init__(self, 
                  instruments : List[Type[InterestRateHelper]], 
@@ -38,8 +38,6 @@ class Bootstrap:
         """
         t = self.day_counter(0, time_from_reference(None, d))
         r = self._value(t)
-        print(f'{r = }')
-        print(f'{t = }')
         return np.exp(-r*t)
     
     # TODO: create a better solution for forecast_fixing, should be inside deposit_helper
@@ -63,6 +61,7 @@ class Bootstrap:
             """
             df_1 = self._discount(d1)
             df_2 = self._discount(d2)
+            print((df_1/df_2-1)/t)
             return (df_1/df_2-1)/t
 
     def _curve_pillars(self, instruments : List[Type[InterestRateHelper]]) -> List[int]:
@@ -151,6 +150,17 @@ class Bootstrap:
         else:
             # https://stackoverflow.com/a/37873955
             return bisect_left(self.pillars, x) - x_begin-1
+    def bootstrap_error(self, 
+                            r : float,
+                            instrument : Callable,
+                            segment: int, 
+                            value_date: datetime.date,
+                            maturity_date: datetime.date,
+                            t : float):
+            self.curve[segment] = r
+            if segment == 1:
+                 self.curve[0] = self.curve[segment]
+            return instrument.quote - self._forecast_fixing(value_date, maturity_date, t)
     def calculate(self):
         """
         When called will extend the curve pillar at a time with each new instrument.
@@ -169,16 +179,23 @@ class Bootstrap:
         ----------
         
         """
-        # Replace below with a for loop
-        segment = 0
-        instrument = self.instruments[0]
+        # ? Replace below with a for loop
+        segment = 1 # ! consider the zero rate to be equal to the zero rate at element 1
+        instrument = self.instruments[segment-1]
         value_date = instrument.value_date
         maturity_date = instrument.maturity_date
         t = instrument.year_fraction(value_date, maturity_date)
         self._update()
-        return self._forecast_fixing(value_date, maturity_date, t)
-    def bootstrap_error(self) -> float:
-        pass
+
+        pre_solve = partial(self.bootstrap_error,
+                            instrument = instrument,
+                            segment = segment,
+                            value_date = value_date,
+                            maturity_date = maturity_date,
+                            t = t)
+        optimize.root_scalar(lambda r: pre_solve(r =r), bracket=[-10, 10], method='brentq')
+        return self.curve
+
     def _order_instruments(self):
         """
         Orders the given instrument list of classes based on their maturity days.
