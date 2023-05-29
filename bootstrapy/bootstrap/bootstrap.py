@@ -1,7 +1,7 @@
 from typing import List, Type, Callable
 from bootstrapy.helpers.interest_rate_helper import InterestRateHelper
 from bootstrapy.time.date.maturity import time_from_reference
-from bisect import bisect_left
+from bisect import bisect_right
 import datetime
 import numpy as np
 from scipy import optimize
@@ -22,7 +22,7 @@ class Bootstrap:
         self.x_end = self.pillars[-1]
         self.y_begin = self.curve
         # TODO: Temporary solution
-        self.s_ = len(self.curve ) * [0]
+        self.s_ = (len(self.curve ) +1)* [0]
     def _discount(self, 
                  d : datetime.time
                  ) -> float:
@@ -39,6 +39,7 @@ class Bootstrap:
         """
         t = self.day_counter(0, time_from_reference(None, d))
         r = self._value(t)
+        print(f'{r = }')
         return np.exp(-r*t)
     
     # TODO: create a better solution for forecast_fixing, should be inside deposit_helper
@@ -142,17 +143,17 @@ class Bootstrap:
         x_end: float
             The 
         """
-        index_end = bisect_left(self.pillars, x)+1
-        x_ahead_end = self.pillars[index_end -1]
+        index_end = bisect_right(self.pillars, x)+1                                                                                             
+        #x_ahead_end = self.pillars[index_end -1]
         x_begin = self.x_begin[0]
         if (x < x_begin):
             return 0
-        elif (x > x_ahead_end):
-            raise NotImplementedError
-            #return self.x_end-self.x_begin-2
+        #elif (x > x_ahead_end):
+        #    raise NotImplementedError
+        #    return self.x_end-self.x_begin-2
         else:
             # https://stackoverflow.com/a/37873955
-            return bisect_left(self.pillars, x) - x_begin-1
+            return bisect_right(self.pillars, x) - x_begin-1
     def bootstrap_error(self, 
                         r : float,
                         instrument : Callable,
@@ -162,11 +163,12 @@ class Bootstrap:
                         t : float
                         ) -> float:
             self.curve[segment] = r
+            self.y_begin = self.curve
             if segment == 1:
                  self.curve[0] = self.curve[segment]
             print(f'{self._forecast_fixing(value_date, maturity_date, t) = }')
             return instrument.quote - self._forecast_fixing(value_date, maturity_date, t)
-    def calculate(self):
+    def calculate_single(self):
         """
         When called will extend the curve pillar at a time with each new instrument.
         
@@ -201,7 +203,7 @@ class Bootstrap:
         optimize.root_scalar(lambda r: pre_solve(r = r), bracket=[-10, 10], method='brentq')
         return self.curve
     
-    def calculate2(self):
+    def calculate(self):
         """
         When called will extend the curve pillar at a time with each new instrument.
         
