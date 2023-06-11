@@ -1,9 +1,11 @@
 from bootstrapy.time.calendars.sweden import sweden_is_business_day
+from bootstrapy.time.calendars.utils import add_fixing
 import datetime
-def adjust(date : str,
+def adjust(date : datetime.date,
            convention : str ):
     """
-    Adjusts a given non business day to the next business day with respect to a convention
+    Adjusts a given non business day to the next business day with respect to a convention. Note here we replace isHoliday with
+    sweden_is_business_day. In the future this will be reimplemented.
 
     Parameters
     ----------
@@ -13,7 +15,39 @@ def adjust(date : str,
     convention : str
         The business day convention, such as following, modified following and such.
     """
-    pass
+    if (convention == 'unadjusted'):
+        return date
+    
+    date1 = date
+    if (convention == 'Following' or convention == 'ModifiedFollowing' or convention == 'HalfMonthModifiedFollowing'):
+        while (sweden_is_business_day(date1) != True):
+            print(date1)
+            date1 = date1 + datetime.timedelta(days=1)
+        if (convention == 'ModifiedFollowing' or convention == 'HalfMonthModifiedFollowing'):
+            if (date1.month != date.month):
+                return adjust(date, 'Preceding')
+            if (convention == 'HalfMonthModifiedFollowing'):
+                if (date.day <= 15 and date1.day > 15):
+                    return adjust(date, 'Preceding')
+            
+    elif (convention == 'Preceding' or convention == 'ModifiedPreceding')   :
+        while (sweden_is_business_day(date1) != True):
+            date1 = date1 - datetime.timedelta(days=1)
+        if (convention == 'ModifiedPreceding' and (date1.month != date.month)):
+            return adjust(date, 'Following')
+    elif (convention == 'Nearest'):
+        date2 = date
+        while ((sweden_is_business_day(date1) != True) and (sweden_is_business_day(date2) != True)):
+            date1 = date1 + datetime.timedelta(days=1)
+            date2 = date2 - datetime.timedelta(days=1)
+        if (sweden_is_business_day(date1) != True):
+            return date2
+        else:
+            return date1
+    else:
+        raise ValueError("Unknown business-day convention")
+    return date1
+
 def advance(date : datetime.date,
             n : int,
             time_unit : str,
@@ -49,7 +83,10 @@ def advance(date : datetime.date,
                 n += 1
         return d1
     # To be implemented calendar.cpp
-    #elif time_unit == 'W' | time_unit == 'w':
-        #d1 = d + n *unit 
-
+    elif time_unit == 'W' or time_unit == 'w':
+        d1 = add_fixing(date, n, time_unit)  # What is time_unit
+        return adjust(d1, convention)
+    else:
+        d1 = add_fixing(date, n, time_unit) #n * time_unit  # What is time_unit
+        return adjust(d1, convention)
         

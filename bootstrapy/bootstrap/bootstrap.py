@@ -39,7 +39,6 @@ class Bootstrap:
         """
         t = self.day_counter(0, time_from_reference(None, d))
         r = self._value(t)
-        print(f'{r = }')
         return np.exp(-r*t)
     
     # TODO: create a better solution for forecast_fixing, should be inside deposit_helper
@@ -166,7 +165,6 @@ class Bootstrap:
             self.y_begin = self.curve
             if segment == 1:
                  self.curve[0] = self.curve[segment]
-            print(f'{self._forecast_fixing(value_date, maturity_date, t) = }')
             return instrument.quote - self._forecast_fixing(value_date, maturity_date, t)
     def calculate_single(self):
         """
@@ -235,6 +233,7 @@ class Bootstrap:
                                 maturity_date = maturity_date,
                                 t = t)
             optimize.root_scalar(lambda r: pre_solve(r = r), bracket=[-1, 1], method='brentq')
+        print(f'{self.curve = }')
         return self.curve
     def _order_instruments(self):
         """

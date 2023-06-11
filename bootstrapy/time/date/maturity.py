@@ -24,7 +24,7 @@ def initialize_maturity_date(reference_date: datetime.date, timeunit : str, leng
         elif (timeunit == 'm') | (timeunit == 'M'):
             return reference_date + relativedelta(months= length)
         elif (timeunit == 'y') | (timeunit == 'Y'):
-            return reference_date + relativedelta(months= length)
+            return reference_date + relativedelta(years= length)
         else:
             raise TypeError("Timeunit or length is wrongly set.")
     except:

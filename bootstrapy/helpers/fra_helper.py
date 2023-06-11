@@ -1,16 +1,17 @@
+
 from bootstrapy.helpers.interest_rate_helper import InterestRateHelper
 from bootstrapy.time.date.maturity import maturity_int
 import bootstrapy.time.date.reference_date as reference_date_holder
 from bootstrapy.time.calendars.calendar import advance, adjust
 # types
 from typing import Callable
-class DepositHelper(InterestRateHelper):
+class FRAHelper(InterestRateHelper):
     def __init__(self, 
-                 maturity_input : str, 
+                 imm_offset_start: int,
+                 imm_offset_end: int,
+                 ibor_index: Callable,
                  settlement_input: int, 
-                 daycounter: Callable[[int, int], float],
-                 quote: float,
-                 convention: str):
+                 quote: float):
         super().__init__(daycounter)
         self.timeunit = maturity_input[-1]
         self.length = int(maturity_input[:len(maturity_input)-1])
