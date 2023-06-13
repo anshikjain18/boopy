@@ -31,9 +31,10 @@ class FRAHelper(InterestRateHelper):
         self.value_days = maturity_int(reference_date_holder.reference_date, self.value_date)
         # ? Should just be inserted to the function implied quote
         self.quote = quote
-    def imm_dates(self, date: datetime.date, n):
+    def imm_date(self, date: datetime.date, n):
         """
-        Calculates the imm date for a given date and n.
+        Calculates the imm date for a given date and offset n.
+        
         References
         ----------
         ratehelpers.cpp
@@ -42,6 +43,7 @@ class FRAHelper(InterestRateHelper):
         ----------
         
         """
+        print("Test")
         raise NotImplementedError
 
     def initialize_dates(self):
