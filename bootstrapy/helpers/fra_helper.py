@@ -1,21 +1,28 @@
-
 from bootstrapy.helpers.interest_rate_helper import InterestRateHelper
 from bootstrapy.time.date.maturity import maturity_int
 import bootstrapy.time.date.reference_date as reference_date_holder
 from bootstrapy.time.calendars.calendar import advance, adjust
 import datetime
+from dateutil.rrule import rrule, MONTHLY, WE
+
 # types
 from typing import Callable
+
+
 class FRAHelper(InterestRateHelper):
-    def __init__(self, 
-                 imm_offset_start: int,
-                 imm_offset_end: int,
-                 ibor_index: Callable,
-                 settlement_input: int, 
-                 quote: float):
+    def __init__(
+        self,
+        imm_offset_start: int,
+        imm_offset_end: int,
+        ibor_index: Callable,
+        settlement_input: int,
+        quote: float,
+    ):
+        self.imm_offset_start = imm_offset_start
+        self.imm_offset_end = imm_offset_end
         self.fixing_days = settlement_input
         self.convention = ibor_index.convention
-        self.daycounter = ibor_index.daycounter
+        self.day_count = ibor_index.day_count
         # New implementation of calendar dates
         self.reference_date = None
         self.earliest_date = None
@@ -26,43 +33,83 @@ class FRAHelper(InterestRateHelper):
         self.value_date = None
         self.initialize_dates()
 
-        #? Move maturity_int to bootstrap function
-        self.maturity_days = maturity_int(reference_date_holder.reference_date, self.maturity_date)
-        self.value_days = maturity_int(reference_date_holder.reference_date, self.value_date)
+        # ? Move maturity_int to bootstrap function
+        self.maturity_days = maturity_int(
+            reference_date_holder.reference_date, self.maturity_date
+        )
+        #   self.value_days = maturity_int(
+        #       reference_date_holder.reference_date, self.value_date
+        #   )
         # ? Should just be inserted to the function implied quote
         self.quote = quote
-    def imm_date(self, date: datetime.date, n):
+
+    def next_IMM_date(self, date: datetime.date) -> datetime.date:
+        """
+        Calculates the next IMM date given a date. Note the datetime.timedelta(days=1) is used in such a way that the if the current
+        date is an imm date it will skip it.
+
+        References
+        ----------
+
+        Parameters
+        ----------
+
+        """
+        return list(
+            rrule(
+                MONTHLY,
+                count=1,
+                byweekday=WE(3),
+                dtstart=date + datetime.timedelta(days=1),
+            )
+        )[0].date()
+
+    def nth_IMM_date(self, date: datetime.date, offset: int) -> datetime.date:
         """
         Calculates the imm date for a given date and offset n.
-        
+
         References
         ----------
         ratehelpers.cpp
-        https://quant.stackexchange.com/questions/8616/imm-dates-in-excel 
+        https://quant.stackexchange.com/questions/8616/imm-dates-in-excel
         Parameters
         ----------
-        
+
         """
-        print("Test")
-        raise NotImplementedError
+        imm = date
+        for i in range(offset):
+            imm = self.next_IMM_date(imm)
+        return imm
 
     def initialize_dates(self):
         """
-        Calculates the necessary dates for the deposits. 
+        Calculates the necessary dates for the deposits.
 
         References
         ----------
         ratehelpers.cpp
         """
-        self.reference_date = adjust(reference_date_holder.reference_date, self.convention)
-        self.spot_date = advance(self.reference_date, self.fixing_days, 'D', self.convention)
-        self.earliest_date = None
+        self.reference_date = adjust(
+            reference_date_holder.reference_date, self.convention
+        )
+        self.spot_date = advance(
+            self.reference_date, self.fixing_days, "D", self.convention
+        )
+        self.earliest_date = adjust(
+            self.nth_IMM_date(self.spot_date, self.imm_offset_start), self.convention
+        )
         # Here we assume useIndexedCoupon_ is set to true always.
-        self.maturity_date = None
+        self.maturity_date = adjust(
+            self.nth_IMM_date(self.spot_date, self.imm_offset_end), self.convention
+        )
+
         self.pillar_date = self.maturity_date
-        self.value_date = advance(self.fixing_date, self.fixing_days, "D", None)#
-        self.fixing_date = advance(self.earliest_date,-self.fixing_days, 'D', self.convention)
+
+    # self.value_date = advance(self.fixing_date, self.fixing_days, "D", None)  #
+
+    # self.fixing_date = advance(
+    #    self.earliest_date, -self.fixing_days, "D", self.convention
+    # )
 
     def implied_quote(self):
         raise NotImplementedError
-
