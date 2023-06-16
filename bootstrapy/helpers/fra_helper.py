@@ -17,6 +17,7 @@ class FRAHelper(InterestRateHelper):
         ibor_index: Callable,
         settlement_input: int,
         quote: float,
+        useIndexedCoupon_ = True
     ):
         self.imm_offset_start = imm_offset_start
         self.imm_offset_end = imm_offset_end
@@ -32,16 +33,11 @@ class FRAHelper(InterestRateHelper):
         self.pillar_date = None
         self.value_date = None
         self.initialize_dates()
-
-        # ? Move maturity_int to bootstrap function
         self.maturity_days = maturity_int(
             reference_date_holder.reference_date, self.maturity_date
         )
-        #   self.value_days = maturity_int(
-        #       reference_date_holder.reference_date, self.value_date
-        #   )
-        # ? Should just be inserted to the function implied quote
         self.quote = quote
+        self.useIndexedCoupon_ = useIndexedCoupon_
 
     def next_IMM_date(self, date: datetime.date) -> datetime.date:
         """
@@ -71,9 +67,6 @@ class FRAHelper(InterestRateHelper):
         References
         ----------
         ratehelpers.cpp
-        https://quant.stackexchange.com/questions/8616/imm-dates-in-excel
-        Parameters
-        ----------
 
         """
         imm = date
@@ -104,12 +97,10 @@ class FRAHelper(InterestRateHelper):
         )
 
         self.pillar_date = self.maturity_date
-
-    # self.value_date = advance(self.fixing_date, self.fixing_days, "D", None)  #
-
-    # self.fixing_date = advance(
-    #    self.earliest_date, -self.fixing_days, "D", self.convention
-    # )
-
+        self.fixing_date = self.ibor_index.fixing_date(self.earliest_date)
     def implied_quote(self):
         raise NotImplementedError
+#        return self.ibor_index.fixing(self.fixing_date)
+
+
+
