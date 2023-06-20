@@ -17,7 +17,7 @@ class FRAHelper(InterestRateHelper):
         ibor_index: Callable,
         settlement_input: int,
         quote: float,
-        useIndexedCoupon_ = True
+        useIndexedCoupon_=True,
     ):
         self.imm_offset_start = imm_offset_start
         self.imm_offset_end = imm_offset_end
@@ -72,6 +72,7 @@ class FRAHelper(InterestRateHelper):
         imm = date
         for i in range(offset):
             imm = self.next_IMM_date(imm)
+            print(imm)
         return imm
 
     def initialize_dates(self):
@@ -97,10 +98,11 @@ class FRAHelper(InterestRateHelper):
         )
 
         self.pillar_date = self.maturity_date
-        self.fixing_date = self.ibor_index.fixing_date(self.earliest_date)
+        # self.fixing_date = self.ibor_index.fixing_date(self.earliest_date)
+        print(self.nth_IMM_date(self.spot_date, self.imm_offset_start))
+
     def implied_quote(self):
         raise NotImplementedError
+
+
 #        return self.ibor_index.fixing(self.fixing_date)
-
-
-
