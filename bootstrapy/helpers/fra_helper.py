@@ -17,7 +17,8 @@ class FRAHelper(InterestRateHelper):
         ibor_index: Callable,
         settlement_input: int,
         quote: float,
-        useIndexedCoupon_=True,
+        pillar: str = "last_relevant_date",
+        useIndexedCoupon: bool = True,
     ):
         self.imm_offset_start = imm_offset_start
         self.imm_offset_end = imm_offset_end
@@ -30,6 +31,8 @@ class FRAHelper(InterestRateHelper):
         self.spot_date = None
         self.fixing_date = None
         self.maturity_date = None
+        self.last_relevant_date = None
+        self.pillar = pillar
         self.pillar_date = None
         self.value_date = None
         self.initialize_dates()
@@ -55,6 +58,7 @@ class FRAHelper(InterestRateHelper):
             rrule(
                 MONTHLY,
                 count=1,
+                bymonth=[3, 6, 9, 12],
                 byweekday=WE(3),
                 dtstart=date + datetime.timedelta(days=1),
             )
@@ -72,7 +76,6 @@ class FRAHelper(InterestRateHelper):
         imm = date
         for i in range(offset):
             imm = self.next_IMM_date(imm)
-            print(imm)
         return imm
 
     def initialize_dates(self):
@@ -92,14 +95,19 @@ class FRAHelper(InterestRateHelper):
         self.earliest_date = adjust(
             self.nth_IMM_date(self.spot_date, self.imm_offset_start), self.convention
         )
-        # Here we assume useIndexedCoupon_ is set to true always.
+
         self.maturity_date = adjust(
             self.nth_IMM_date(self.spot_date, self.imm_offset_end), self.convention
         )
+        """
 
-        self.pillar_date = self.maturity_date
-        # self.fixing_date = self.ibor_index.fixing_date(self.earliest_date)
-        print(self.nth_IMM_date(self.spot_date, self.imm_offset_start))
+        self.fixing_date = self.ibor_index.fixing_date(self.earliest_date)
+
+        if self.useIndexedCoupon == True:
+            self.last_relevant_date = self.ibor_index.maturity_date(self.earliest_date)
+        """
+        if self.pillar == "last_relevant_date":
+            self.pillar_date = self.latest_relevant_date
 
     def implied_quote(self):
         raise NotImplementedError
