@@ -14,6 +14,7 @@ class InterestRateHelper:
         Calculates the year fraction. If d1 is equal to d1, then assume it will be the
         year fraction using the reference date.
         
+        This class has now been moved to calendars utils.py. Move all references of this function.
         Parameters
         ----------
 

@@ -1,5 +1,6 @@
 from typing import Callable
 from bootstrapy.time.calendars.calendar import adjust, advance
+from bootstrapy.time.calendars.util import year_fraction
 import datetime
 
 
@@ -19,7 +20,23 @@ class IborIndex:
         self.convention = convention
         self.day_count = day_count
 
+    def value_date(self, date: datetime.date) -> datetime.date:
+        """
+        Calculates the value date of the ibor index given a date.
+
+        References
+        ----------
+        interestrateindex.hpp
+        """
+        return advance(date, self.settlement_days, "D", self.convention)
     def maturity_date(self, date: datetime.date) -> datetime.date:
+        """
+        Calculates the maturity date of the ibor index given a date.
+
+        References
+        ----------
+        iborindex.cpp
+            """
         return advance(date, self.length, self.timeunit, self.convention)
 
     def fixing_date(self, date: datetime.date) -> datetime.date:
@@ -32,3 +49,8 @@ class IborIndex:
         ratehelpers.cpp
         """
         return advance(date, -self.settlement_days, "D", self.convention)
+    def forecast_fixing(self, fixing_date : datetime.date) -> datetime.date:
+        d1 = self.value_date(fixing_date)
+        d2 = self.maturity_date(d1)
+        t = year_fraction(d1,d2)
+        raise NotImplementedError
