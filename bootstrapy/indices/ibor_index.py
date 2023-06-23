@@ -19,6 +19,9 @@ class IborIndex:
         self.convention = convention
         self.day_count = day_count
 
+    def maturity_date(self, date: datetime.date) -> datetime.date:
+        return advance(date, self.length, self.timeunit, self.convention)
+
     def fixing_date(self, date: datetime.date) -> datetime.date:
         """
         Calculates the fixing date given a date.

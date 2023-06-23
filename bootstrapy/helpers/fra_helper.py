@@ -35,12 +35,14 @@ class FRAHelper(InterestRateHelper):
         self.pillar = pillar
         self.pillar_date = None
         self.value_date = None
+        self.useIndexedCoupon = useIndexedCoupon
+        self.ibor_index = ibor_index
+        self.latest_relevant_date = None
         self.initialize_dates()
         self.maturity_days = maturity_int(
             reference_date_holder.reference_date, self.maturity_date
         )
         self.quote = quote
-        self.useIndexedCoupon_ = useIndexedCoupon_
 
     def next_IMM_date(self, date: datetime.date) -> datetime.date:
         """
@@ -99,13 +101,12 @@ class FRAHelper(InterestRateHelper):
         self.maturity_date = adjust(
             self.nth_IMM_date(self.spot_date, self.imm_offset_end), self.convention
         )
-        """
 
         self.fixing_date = self.ibor_index.fixing_date(self.earliest_date)
 
         if self.useIndexedCoupon == True:
-            self.last_relevant_date = self.ibor_index.maturity_date(self.earliest_date)
-        """
+            self.latest_relevant_date = self.ibor_index.maturity_date(self.earliest_date)
+
         if self.pillar == "last_relevant_date":
             self.pillar_date = self.latest_relevant_date
 
