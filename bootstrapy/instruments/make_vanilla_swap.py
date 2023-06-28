@@ -18,6 +18,11 @@ class MakeVanillaSwap:
         fwd_start: str,
         fixed_rate: float = 0,
     ):
+        self.tenor = tenor
+        self.ibor_index = ibor_index
+        self.fwd_start = fwd_start
+        self.fixed_rate = fixed_rate
+
         self.with_settlement_days = None
         self.with_fixed_leg_day_count = None
         self.with_fixed_leg_tenor = None
