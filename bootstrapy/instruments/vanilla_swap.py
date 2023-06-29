@@ -1,10 +1,13 @@
 import datetime
 from bootstrapy.instruments.swap import Swap
+from typing import Callable
 
 
 class VanillaSwap(Swap):
     def __init__(
         self,
+        fixed_rate: float,
+        ibor_index: Callable,
         settlement_days,
         fixed_day_counter,
         fixed_tenor,
@@ -26,3 +29,17 @@ class VanillaSwap(Swap):
         self.floating_leg_calendar_ = floating_leg_calendar
         self.floating_leg_end_of_month_ = floating_leg_end_of_month
         self.indexed_coupons_ = indexed_coupons
+
+        self.legs = [0] * 2
+        fixed_schedule, nominal, payment_convention = 0, 0, 0  # To be implemented
+        self.legs[0] = self.FixedRateLeg(
+            fixed_schedule, nominal, fixed_rate, fixed_day_counter, payment_convention
+        )
+        floating_schedule = 0  # To be implemented
+        self.legs[1] = self.ibor_leg(
+            floating_schedule,
+            nominal,
+            ibor_index.day_count,
+            payment_convention,
+            self.indexed_coupons_,
+        )
