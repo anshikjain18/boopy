@@ -30,15 +30,20 @@ class VanillaSwap(Swap):
         self.floating_leg_end_of_month_ = floating_leg_end_of_month
         self.indexed_coupons_ = indexed_coupons
 
+        self.nominal = 1
         self.legs = [0] * 2
-        fixed_schedule, nominal, payment_convention = 0, 0, 0  # To be implemented
+        fixed_schedule, payment_convention = 0, 0  # To be implemented
         self.legs[0] = self.FixedRateLeg(
-            fixed_schedule, nominal, fixed_rate, fixed_day_counter, payment_convention
+            fixed_schedule,
+            self.nominal,
+            fixed_rate,
+            fixed_day_counter,
+            payment_convention,
         )
         floating_schedule = 0  # To be implemented
         self.legs[1] = self.ibor_leg(
             floating_schedule,
-            nominal,
+            self.nominal,
             ibor_index.day_count,
             payment_convention,
             self.indexed_coupons_,
