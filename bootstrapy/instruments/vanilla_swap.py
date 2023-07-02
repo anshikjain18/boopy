@@ -48,3 +48,6 @@ class VanillaSwap(Swap):
             payment_convention,
             self.indexed_coupons_,
         )
+
+        def setup_arguments(self) -> None:
+            raise NotImplementedError
