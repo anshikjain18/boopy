@@ -105,7 +105,9 @@ class FRAHelper(InterestRateHelper):
         self.fixing_date = self.ibor_index.fixing_date(self.earliest_date)
 
         if self.useIndexedCoupon == True:
-            self.latest_relevant_date = self.ibor_index.maturity_date(self.earliest_date)
+            self.latest_relevant_date = self.ibor_index.maturity_date(
+                self.earliest_date
+            )
 
         if self.pillar == "last_relevant_date":
             self.pillar_date = self.latest_relevant_date
