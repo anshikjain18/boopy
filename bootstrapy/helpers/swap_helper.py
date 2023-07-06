@@ -1,6 +1,5 @@
 from bootstrapy.helpers.interest_rate_helper import InterestRateHelper
 from bootstrapy.time.date.maturity import maturity_int
-import bootstrapy.time.date.reference_date as reference_date_holder
 from bootstrapy.time.calendars.calendar import advance, adjust
 from typing import Callable
 from bootstrapy.instruments.make_vanilla_swap import MakeVanillaSwap
@@ -16,6 +15,7 @@ class SwapHelper(InterestRateHelper):
         day_counter: Callable,
         ibor_index: Callable,
         pillar: str = "last_relevant_date",
+        fwd_start: str = "0D",
         calendar: Callable = None,  # To be written, now only the swedish calendar works
         end_of_month: bool = False,
         settlement_day=None,
@@ -27,6 +27,7 @@ class SwapHelper(InterestRateHelper):
         self.convention = convention
         self.timeunit = tenor[-1]
         self.length = int(tenor[: len(tenor) - 1])
+        self.fwd_start = fwd_start
         self.calendar = calendar
         self.frequency = frequency
         self.ibor_index = ibor_index
@@ -45,7 +46,7 @@ class SwapHelper(InterestRateHelper):
         makevanillaswap.cpp
         """
         vanilla_swap = self.vanilla_swap = MakeVanillaSwap(
-            self.tenor, self.ibor_index, "fwd_start_to_imp", self.rate
+            self.tenor, self.ibor_index, self.fwd_start, self.rate
         )
         self.vanilla_swap.with_settlement_days = self.settlement_day
         self.vanilla_swap.with_fixed_leg_day_count = self.day_count

@@ -3,13 +3,14 @@ from bootstrapy.instruments.vanilla_swap import VanillaSwap
 from bootstrapy.time.schedule import Schedule
 import bootstrapy.time.date.reference_date as reference_date_holder
 from bootstrapy.time.calendars.calendar import advance, adjust
+from bootstrapy.time.calendars.utils import str_to_datetime, add_period
 
 
 class MakeVanillaSwap:
     """
     Helper class to make it easier to instantiate a vanilla swap.
 
-    TODO: Remove with_...
+    TODO: Remove with_... naming convention
 
     References
     ----------
@@ -17,11 +18,7 @@ class MakeVanillaSwap:
     """
 
     def __init__(
-        self,
-        tenor: str,
-        ibor_index: Callable,
-        fwd_start: str,
-        fixed_rate: float = 0,
+        self, tenor: str, ibor_index: Callable, fwd_start: str, fixed_rate: float = "0D"
     ):
         self.tenor = tenor
         self.ibor_index = ibor_index
@@ -41,6 +38,8 @@ class MakeVanillaSwap:
         self.with_effective_date = None
 
         self.with_indexed_coupons = None
+        self.with_termination_date = None
+        self.initialize_dates()
 
     def initialize_dates(self) -> Callable:
         """
@@ -50,12 +49,13 @@ class MakeVanillaSwap:
         ----------
         makevanillaswap.cpp
         """
+
         if self.with_effective_date != None:
-            start_date = self.with_effective_date
+            start_date = str_to_datetime(self.with_effective_date)
         else:
-            ref_date = reference_date_holder.reference_date
+            ref_date = str_to_datetime(reference_date_holder.reference_date)
             ref_date = adjust(
-                ref_date
+                ref_date, self.ibor_index.convention
             )  # Should be floating leg calendar as the legs can have different calendars.
             if self.with_settlement_days == None:
                 spot_date = self.ibor_index.value_date(ref_date)
@@ -66,6 +66,23 @@ class MakeVanillaSwap:
                     "D",
                     self.with_fixed_leg_convention,
                 )
+            start_date = add_period(spot_date, self.fwd_start)
+            """
+            add if and else statement for self.fwd_start, see makevanillaswap.cpp            
+            """
+
+        end_date = self.with_termination_date
+        if end_date == None:
+            if self.with_floating_leg_end_of_month:
+                raise NotImplementedError
+                # end_date = adjust(self.start_date, self.tenor, 'ModifiedFollowing', )
+            else:
+                end_date = add_period(start_date, self.tenor)
+
+        # Creates the schedules for the coupons
+        fixed_schedule = Schedule(start_date, end_date)
+
+        float_schedule = Schedule(start_date, end_date)
 
     def make_vanilla_swap(self) -> Callable:
         """
