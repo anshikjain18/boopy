@@ -1,5 +1,6 @@
 import datetime
 from dateutil.relativedelta import relativedelta
+from typing import tuple
 
 
 def is_weekend(arg_date: datetime.date) -> bool:
@@ -41,6 +42,12 @@ def add_fixing(date: datetime.date, fixing: int, time_unit: str) -> datetime.dat
         return date + relativedelta(months=fixing)
     elif time_unit == "Y" or time_unit == "y":
         return date + relativedelta(years=fixing)
+
+
+def convert_period(period: str) -> tuple(int, str):
+    timeunit = period[-1]
+    length = int(period[: len(period) - 1])
+    return (length, timeunit)
 
 
 def add_period(date: datetime.date, period: str) -> datetime.datetime:

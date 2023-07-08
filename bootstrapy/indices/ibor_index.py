@@ -13,6 +13,7 @@ class IborIndex:
         day_count: Callable,
         calendar: Callable = None,  # will be rewritten, now only Swedish Calendar works
     ):
+        self.period = period
         self.settlement_days = settlement_days
         self.timeunit = period[-1]
         self.length = int(period[: len(period) - 1])

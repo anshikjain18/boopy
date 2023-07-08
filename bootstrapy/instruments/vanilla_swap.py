@@ -1,53 +1,40 @@
 import datetime
 from bootstrapy.instruments.swap import Swap
-from typing import Callable
+from typing import Callable, Union
+from bootstrapy.cashflows.fixed_rate_coupon import FixedLeg
 
 
 class VanillaSwap(Swap):
     def __init__(
         self,
-        fixed_rate: float,
+        type,
+        nominal: Union[float, int],
+        fixed_schedule: Callable,
+        rate: Union[float, int],
+        fixed_day_count: Callable,
+        float_schedule: Callable,
         ibor_index: Callable,
-        settlement_days,
-        fixed_day_counter,
-        fixed_tenor,
-        fixed_convention,
-        fixed_leg_termination_date_convention,
-        fixed_leg_calendar,
-        fixed_leg_end_of_month,
-        floating_leg_calendar,
-        floating_leg_end_of_month,
-        indexed_coupons,
+        spread: Union[float, int],
+        float_day_count: Callable,
+        payment_convention: Callable,
+        use_indexed_coupon,
     ):
-        self.settlement_days_ = settlement_days
-        self.fixed_day_count_ = fixed_day_counter
-        self.fixed_tenor_ = fixed_tenor
-        self.fixed_convention_ = fixed_convention
-        self.fixed_termination_date_convention_ = fixed_leg_termination_date_convention
-        self.fixed_leg_calendar_ = fixed_leg_calendar
-        self.fixed_leg_end_of_month_ = fixed_leg_end_of_month
-        self.floating_leg_calendar_ = floating_leg_calendar
-        self.floating_leg_end_of_month_ = floating_leg_end_of_month
-        self.indexed_coupons_ = indexed_coupons
-
-        self.nominal = 1
-        self.legs = [0] * 2
-        fixed_schedule, payment_convention = 0, 0  # To be implemented
-        self.legs[0] = self.FixedRateLeg(
+        self.legs[0] = FixedLeg(
             fixed_schedule,
-            self.nominal,
-            fixed_rate,
-            fixed_day_counter,
+            nominal,
+            rate,
+            fixed_day_count,
             payment_convention,
         )
-        floating_schedule = 0  # To be implemented
-        self.legs[1] = self.ibor_leg(
-            floating_schedule,
-            self.nominal,
+        """
+        self.legs[1] = FloatLeg(
+            float_schedule,
+            nominal,
             ibor_index.day_count,
             payment_convention,
-            self.indexed_coupons_,
+            use_indexed_coupon,
         )
+        """
 
         def setup_arguments(self) -> None:
             raise NotImplementedError

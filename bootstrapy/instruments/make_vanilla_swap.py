@@ -31,17 +31,28 @@ class MakeVanillaSwap:
         self.with_fixed_leg_convention = None
         self.with_fixed_leg_termination_date_convention = None
         self.with_fixed_leg_calendar = None
-        self.with_fixed_leg_end_of_month = None
+        self.with_fixed_leg_end_of_month = False
 
         self.with_floating_leg_calendar = None
-        self.with_floating_leg_end_of_month = None
+        self.with_floating_leg_end_of_month = False
         self.with_effective_date = None
 
         self.with_indexed_coupons = None
         self.with_termination_date = None
-        self.initialize_dates()
+        self.spread = 0
+        self.fixed_rule = "backward"
+        self.float_rule = "backward"
 
-    def initialize_dates(self) -> Callable:
+        self.fixed_first_date = None
+        self.fixed_next_to_last_date = None
+
+        self.float_first_date = None
+        self.float_next_to_last_date = None
+        self.initialize_dates()
+        self.fixed_schedule = None
+        self.float_schedule = None
+
+    def initialize_dates(self) -> None:
         """
         Calculates the dates for creating the schedule of the coupons.
 
@@ -80,9 +91,31 @@ class MakeVanillaSwap:
                 end_date = add_period(start_date, self.tenor)
 
         # Creates the schedules for the coupons
-        fixed_schedule = Schedule(start_date, end_date)
-
-        float_schedule = Schedule(start_date, end_date)
+        self.fixed_schedule = Schedule(
+            start_date,
+            end_date,
+            self.with_fixed_leg_tenor,
+            self.with_fixed_leg_calendar,
+            self.with_fixed_leg_convention,
+            self.with_fixed_leg_termination_date_convention,
+            self.fixed_rule,
+            self.with_fixed_leg_end_of_month,
+            self.fixed_first_date,
+            self.fixed_next_to_last_date,
+        )
+        # Revisit and rewrite properly
+        self.float_schedule = Schedule(
+            start_date,
+            end_date,
+            self.ibor_index.period,
+            self.ibor_index.calendar,
+            self.ibor_index.convention,
+            self.ibor_index.convention,
+            self.float_rule,
+            self.with_floating_leg_end_of_month,
+            self.float_first_date,
+            self.float_next_to_last_date,
+        )
 
     def make_vanilla_swap(self) -> Callable:
         """
@@ -94,15 +127,17 @@ class MakeVanillaSwap:
         """
 
         vanilla_swap = VanillaSwap(
-            self.with_settlement_days,
+            "payer",
+            1,
+            self.fixed_schedule,
+            self.fixed_rate,
             self.with_fixed_leg_day_count,
-            self.with_fixed_leg_tenor,
-            self.with_fixed_leg_convention,
-            self.with_fixed_leg_termination_date_convention,
-            self.with_fixed_leg_calendar,
-            self.with_fixed_leg_end_of_month,
-            self.with_floating_leg_calendar,
-            self.with_floating_leg_end_of_month,
+            self.float_schedule,
+            self.ibor_index,
+            self.spread,
+            self.with_fixed_leg_day_count,
+            None,
             self.with_indexed_coupons,
         )
+
         return vanilla_swap
