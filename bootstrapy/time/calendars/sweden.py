@@ -28,7 +28,7 @@ def sweden_is_business_day(arg_date : datetime.date) -> bool:
         # Only a holiday since 2005
         | ((day_of_month == 6) & (month == 6) & (year >= 2005))
         # Midsummer Eve (Friday between June 19-25)
-        | ((weekday == 4 ) & (day_of_month >= 19 & day_of_month <= 25) & (month == 6))
+        | ((weekday == 4 ) & (day_of_month >= 19) & (day_of_month <= 25) & (month == 6))
         # Christmas Eve
         | ((day_of_month == 24) & month == 12)
         # Christmas Day
