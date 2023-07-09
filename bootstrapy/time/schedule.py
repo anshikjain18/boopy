@@ -1,7 +1,8 @@
 import datetime
 from typing import Callable, Union
 import bootstrapy.time.date.reference_date as reference_date_holder
-from bootstrapy.time.calendars.utils import convert_period
+from bootstrapy.time.calendars.utils import convert_period, multiply_period
+from bootstrapy.time.calendars.calendar import advance, adjust
 
 
 class Schedule:
@@ -43,7 +44,7 @@ class Schedule:
             else:
                 raise NotImplementedError
 
-        tenor_length, _ = convert_period(self.tenor)
+        tenor_length, tenor_unit = convert_period(self.tenor)
 
         if tenor_length == 0:
             self.rule = "zero"
@@ -60,15 +61,40 @@ class Schedule:
             case "zero":
                 raise NotImplementedError
             case "backward":
+                """
+                Add explanation
+                """
                 # add termination date to the end of the list
                 self.dates.insert(len(self.dates), self.termination_date)
                 seed = self.termination_date
+                periods = 1
+
+                """
+                Add explanation 
+                """
                 if self.next_to_last != None:
                     raise NotImplementedError
                 exit_date = self.effective_date
+
+                """
+                Add explanation 
+                """
                 if self.first_date != None:
                     exit_date = self.first_date
                 while True:
-                    temp = c
+                    new_tenor = multiply_period(periods, self.tenor)
+                    tenor_length, tenor_unit = convert_period(new_tenor)
+                    temp = advance(
+                        seed,
+                        -tenor_length,
+                        tenor_unit,
+                        self.convention,
+                    )
+                    if temp < exit_date:
+                        if (self.first_date != None) & adjust(
+                            self.dates[0], self.convention
+                        ) != adjust(self.first_date, self.convention):
+                            self.dates.insert(dates.begin)
+
             case "forward":
                 raise NotImplementedError

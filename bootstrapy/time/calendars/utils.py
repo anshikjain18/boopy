@@ -50,7 +50,7 @@ def convert_period(period: str) -> Tuple[int, str]:
     return (length, timeunit)
 
 
-def add_period(date: datetime.date, period: str) -> datetime.datetime:
+def add_period(date: datetime.date, period: str) -> datetime.date:
     """
     In many cases we want to add the two values datetime.datetime(2023,2,4) and "3M" for example. Then
     we can call this function for that.
@@ -70,6 +70,13 @@ def add_period(date: datetime.date, period: str) -> datetime.datetime:
         elif time_unit == "Y" or time_unit == "y":
             return date + relativedelta(years=length)
         return date
+
+
+def multiply_period(number: int, period: str):
+    time_unit = period[-1]
+    length = int(period[: len(period) - 1])
+    new_length = length * period
+    return str(new_length) + str(time_unit)
 
 
 def year_fraction(d1: datetime.date | None, d2: datetime.date) -> float:

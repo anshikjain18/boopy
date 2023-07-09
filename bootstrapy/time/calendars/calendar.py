@@ -1,6 +1,6 @@
 from bootstrapy.time.calendars.sweden import sweden_is_business_day
 from bootstrapy.time.calendars.null_calendar import null_calendar
-from bootstrapy.time.calendars.utils import add_fixing
+from bootstrapy.time.calendars.utils import add_fixing, multiply_period
 import datetime
 
 
@@ -84,13 +84,13 @@ def advance(date: datetime.date, n: int, time_unit: str, convention: str):
         if n > 0:
             while n > 0:
                 d1 = d1 + datetime.timedelta(days=1)
-                while calendar(d1) != True:
+                while sweden_is_business_day(d1) != True:
                     d1 = d1 + datetime.timedelta(days=1)
                 n -= 1
         else:
             while n < 0:
                 d1 = d1 + datetime.timedelta(days=-1)
-                while calendar(d1) != True:
+                while sweden_is_business_day(d1) != True:
                     d1 = d1 + datetime.timedelta(days=-1)
                 n += 1
         return d1
