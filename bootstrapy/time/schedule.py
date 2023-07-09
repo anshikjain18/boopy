@@ -28,6 +28,7 @@ class Schedule:
         self.end_of_month = end_of_month
         self.first_date = first_date
         self.next_to_last = next_to_last
+        self.dates = []
         self.initialize_dates()
 
     def initialize_dates(self) -> None:
@@ -54,3 +55,20 @@ class Schedule:
 
         if self.next_to_last != None:
             raise NotImplementedError
+
+        match self.rule:
+            case "zero":
+                raise NotImplementedError
+            case "backward":
+                # add termination date to the end of the list
+                self.dates.insert(len(self.dates), self.termination_date)
+                seed = self.termination_date
+                if self.next_to_last != None:
+                    raise NotImplementedError
+                exit_date = self.effective_date
+                if self.first_date != None:
+                    exit_date = self.first_date
+                while True:
+                    temp = c
+            case "forward":
+                raise NotImplementedError
