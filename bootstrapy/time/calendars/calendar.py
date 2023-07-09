@@ -32,7 +32,7 @@ def adjust(date: datetime.date, convention: str, null: bool = False):
         or convention == "ModifiedFollowing"
         or convention == "HalfMonthModifiedFollowing"
     ):
-        while calendar(date1) != True:
+        while calendar(date1) == False:
             date1 = date1 + datetime.timedelta(days=1)
         if (
             convention == "ModifiedFollowing"
@@ -63,7 +63,9 @@ def adjust(date: datetime.date, convention: str, null: bool = False):
     return date1
 
 
-def advance(date: datetime.date, n: int, time_unit: str, convention: str):
+def advance(
+    date: datetime.date, n: int, time_unit: str, convention: str, null: bool = False
+):
     """
     Parameters
     ----------
@@ -77,6 +79,11 @@ def advance(date: datetime.date, n: int, time_unit: str, convention: str):
         The business day convention, such as following, modified following and such.
 
     """
+    # Quick fix to create a null calendar for schedule.
+    calendar = sweden_is_business_day
+
+    if null == True:
+        calendar = null_calendar
     if n == 0:
         return adjust(date, convention)
     elif (time_unit == "D") | (time_unit == "d"):
@@ -84,13 +91,13 @@ def advance(date: datetime.date, n: int, time_unit: str, convention: str):
         if n > 0:
             while n > 0:
                 d1 = d1 + datetime.timedelta(days=1)
-                while sweden_is_business_day(d1) != True:
+                while calendar(d1) != True:
                     d1 = d1 + datetime.timedelta(days=1)
                 n -= 1
         else:
             while n < 0:
                 d1 = d1 + datetime.timedelta(days=-1)
-                while sweden_is_business_day(d1) != True:
+                while calendar(d1) != True:
                     d1 = d1 + datetime.timedelta(days=-1)
                 n += 1
         return d1
@@ -100,4 +107,4 @@ def advance(date: datetime.date, n: int, time_unit: str, convention: str):
         return adjust(d1, convention)
     else:
         d1 = add_fixing(date, n, time_unit)  # n * time_unit  # What is time_unit
-        return adjust(d1, convention)
+        return adjust(d1, convention, null)

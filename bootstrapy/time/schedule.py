@@ -15,9 +15,9 @@ class Schedule:
         convention: Callable,
         termination_date_convention: Callable,
         rule: str,
-        end_of_month: bool,
-        first_date: Union[datetime.datetime, None],
-        next_to_last: Union[datetime.datetime, None],
+        end_of_month: bool = False,
+        first_date: Union[datetime.datetime, None] = None,
+        next_to_last: Union[datetime.datetime, None] = None,
     ):
         self.effective_date = effective_date
         self.termination_date = termination_date
@@ -45,8 +45,8 @@ class Schedule:
         """
         if (
             (self.effective_date == None)
-            & (self.first == None)
-            & (self.first == "backward")
+            & (self.first_date == None)
+            & (self.first_date == "backward")
         ):
             eval_date = reference_date_holder.reference_date
             if self.next_to_last != None:
@@ -58,8 +58,8 @@ class Schedule:
 
         if tenor_length == 0:
             self.rule = "zero"
-        else:
-            raise ValueError("Accrued payments for coupons can not be zero days")
+        # else:
+        #    raise ValueError("Accrued payments for coupons can not be zero days")
 
         if self.first_date != None:
             raise NotImplementedError
@@ -95,17 +95,18 @@ class Schedule:
                     new_tenor = multiply_period(periods, self.tenor)
                     tenor_length, tenor_unit = convert_period(new_tenor)
                     temp = advance(
-                        seed,
-                        -tenor_length,
-                        tenor_unit,
-                        self.convention,
+                        seed, -tenor_length, tenor_unit, self.convention, True
                     )
+                    print(f"{temp = }")
                     if temp < exit_date:
-                        if (self.first_date != None) & adjust(
-                            self.dates[0], self.convention
-                        ) != adjust(self.first_date, self.convention):
-                            self.dates.insert(0, self.first_date)
-                            self.is_regular.insert(0, False)
+                        statement_1 = self.first_date != None
+                        if statement_1 == True:
+                            statement_2 = adjust(
+                                self.dates[0], self.convention
+                            ) != adjust(self.first_date, self.convention)
+                            if statement_2 == True:
+                                self.dates.insert(0, self.first_date)
+                                self.is_regular.insert(0, False)
                         break
                     else:
                         if adjust(self.dates[0], self.convention) != adjust(
@@ -124,3 +125,11 @@ class Schedule:
                 raise NotImplementedError
 
             # Adjustments
+            # Implement end of month logic
+        if self.end_of_month == True:
+            raise NotImplementedError
+        else:
+            if self.rule != "old_cds":
+                self.dates[0] = adjust(self.dates[0], self.convention)
+            for i in range(1, len(self.dates) - 1):
+                self.dates[i] = adjust(self.dates[i], self.convention)
