@@ -14,8 +14,8 @@ class Schedule:
         calendar: Callable,
         convention: Callable,
         termination_date_convention: Callable,
-        rule,
-        end_of_month: str,
+        rule: str,
+        end_of_month: bool,
         first_date: Union[datetime.datetime, None],
         next_to_last: Union[datetime.datetime, None],
     ):
@@ -30,9 +30,19 @@ class Schedule:
         self.first_date = first_date
         self.next_to_last = next_to_last
         self.dates = []
+        self.is_regular = []
         self.initialize_dates()
 
     def initialize_dates(self) -> None:
+        """
+        Should be moved to __init__. A function to generate the coupons dates.
+        References
+        ----------
+
+        Parameters
+        ----------
+
+        """
         if (
             (self.effective_date == None)
             & (self.first == None)
@@ -65,7 +75,7 @@ class Schedule:
                 Add explanation
                 """
                 # add termination date to the end of the list
-                self.dates.insert(len(self.dates), self.termination_date)
+                self.dates.append(self.termination_date)
                 seed = self.termination_date
                 periods = 1
 
@@ -94,7 +104,23 @@ class Schedule:
                         if (self.first_date != None) & adjust(
                             self.dates[0], self.convention
                         ) != adjust(self.first_date, self.convention):
-                            self.dates.insert(dates.begin)
+                            self.dates.insert(0, self.first_date)
+                            self.is_regular.insert(0, False)
+                        break
+                    else:
+                        if adjust(self.dates[0], self.convention) != adjust(
+                            temp, self.convention
+                        ):
+                            self.dates.insert(0, temp)
+                            self.is_regular.insert(0, True)
+                        periods = periods + 1
 
+                if adjust(self.dates[0], self.convention) != adjust(
+                    self.effective_date, self.convention
+                ):
+                    self.dates.insert(0, self.effective_date)
+                    self.is_regular.insert(0, False)
             case "forward":
                 raise NotImplementedError
+
+            # Adjustments

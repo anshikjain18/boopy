@@ -75,7 +75,7 @@ def add_period(date: datetime.date, period: str) -> datetime.date:
 def multiply_period(number: int, period: str):
     time_unit = period[-1]
     length = int(period[: len(period) - 1])
-    new_length = length * period
+    new_length = number * length
     return str(new_length) + str(time_unit)
 
 
