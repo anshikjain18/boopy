@@ -33,6 +33,15 @@ class Schedule:
         self.is_regular = []
         self.initialize_dates()
 
+    def has_tenor(self):
+        return self.tenor != None
+
+    def has_is_regular(self):
+        return len(self.is_regular) != 0
+
+    def __len__(self):
+        return len(self.dates)
+
     def initialize_dates(self) -> None:
         """
         Should be moved to __init__. A function to generate the coupons dates.

@@ -44,6 +44,26 @@ def add_fixing(date: datetime.date, fixing: int, time_unit: str) -> datetime.dat
         return date + relativedelta(years=fixing)
 
 
+def is_period(period: str) -> bool:
+    """
+    Corresponds to d + n*unit in calendar.cpp.
+
+    References
+    ----------
+    calendar.cpp
+    """
+    if period == "D" or period == "d":
+        return True
+    elif period == "W" or period == "w":
+        return True
+    elif period == "M" or period == "m":
+        return True
+    elif period == "Y" or period == "y":
+        return True
+    else:
+        return False
+
+
 def convert_period(period: str) -> Tuple[int, str]:
     timeunit = period[-1]
     length = int(period[: len(period) - 1])

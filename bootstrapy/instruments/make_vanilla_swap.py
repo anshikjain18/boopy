@@ -18,7 +18,7 @@ class MakeVanillaSwap:
     """
 
     def __init__(
-        self, tenor: str, ibor_index: Callable, fwd_start: str, fixed_rate: float = "0D"
+        self, tenor: str, ibor_index: Callable, fwd_start: str, fixed_rate: float = 0
     ):
         self.tenor = tenor
         self.ibor_index = ibor_index
