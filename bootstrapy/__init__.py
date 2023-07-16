@@ -1,3 +1,6 @@
+# Reference date
+import bootstrapy.time.date.reference_date as reference_date_holder
+
 # Helpers
 from bootstrapy.helpers.deposit_helper import DepositHelper
 from bootstrapy.helpers.fra_helper import FRAHelper
@@ -10,5 +13,4 @@ from bootstrapy.indices.ibor_index import IborIndex
 from bootstrapy.time.daycounters.daycounters import ACT360, ACT365
 
 # Frequency
-
-from bootstrapy.time.frequency.frequency import Annual
+from bootstrapy.time.frequency.frequency import Frequency

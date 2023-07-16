@@ -27,7 +27,7 @@ class MakeVanillaSwap:
 
         self.with_settlement_days = None
         self.with_fixed_leg_day_count = None
-        self.with_fixed_leg_tenor = None
+        self._fixed_tenor = None
         self.with_fixed_leg_convention = None
         self.with_fixed_leg_termination_date_convention = None
         self.with_fixed_leg_calendar = None
@@ -48,11 +48,14 @@ class MakeVanillaSwap:
 
         self.float_first_date = None
         self.float_next_to_last_date = None
-        self.initialize_dates()
         self.fixed_schedule = None
         self.float_schedule = None
 
-    def initialize_dates(self) -> None:
+    def with_fixed_leg_tenor(self, tenor):
+        self._fixed_tenor = tenor
+
+    # Bad naming convention, should be fixed in the future.
+    def init_make_vanilla_swap(self) -> None:
         """
         Calculates the dates for creating the schedule of the coupons.
 
@@ -75,7 +78,7 @@ class MakeVanillaSwap:
                     ref_date,
                     self.with_settlement_days,
                     "D",
-                    self.with_fixed_leg_convention,
+                    self._fixed_tenor,
                 )
             start_date = add_period(spot_date, self.fwd_start)
             """
@@ -94,7 +97,7 @@ class MakeVanillaSwap:
         self.fixed_schedule = Schedule(
             start_date,
             end_date,
-            self.with_fixed_leg_tenor,
+            self._fixed_tenor,
             self.with_fixed_leg_calendar,
             self.with_fixed_leg_convention,
             self.with_fixed_leg_termination_date_convention,

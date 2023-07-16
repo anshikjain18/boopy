@@ -1,14 +1,14 @@
 import datetime
 from bootstrapy.instruments.swap import Swap
 from typing import Callable, Union
-from bootstrapy.cashflows.fixed_rate_coupon import FixedLeg
-from bootstrapy.cashflows.fixed_rate_coupon import FixedLeg
+from bootstrapy.cashflows.fixed_rate_coupon import FixedRateLeg
+from bootstrapy.cashflows.ibor_coupon import IborLeg
 
 
 class VanillaSwap(Swap):
     def __init__(
         self,
-        type,
+        type: str,
         nominal: Union[float, int],
         fixed_schedule: Callable,
         rate: Union[float, int],
@@ -21,7 +21,7 @@ class VanillaSwap(Swap):
         use_indexed_coupon,
     ):
         self.legs[0] = (
-            FixedLeg(
+            FixedRateLeg(
                 fixed_schedule,
                 payment_convention,
             )

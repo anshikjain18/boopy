@@ -1,12 +1,12 @@
 from typing import Union, Callable, List
 from bootstrapy.time.calendars.calendar import advance, adjust
 from bootstrapy.time.calendars.utils import subtract_period, add_period, is_period
-from bootstrapy.cashflows.floating_rate_coupon import FloatingLeg
+from bootstrapy.cashflows.floating_rate_coupon import FloatingRateLeg
 
 
 def get(vector: List, i: int, default_value: Union[float, int]) -> Union[float, int]:
     """
-    Corresponds to Quantlib get.
+    Corresponds to Quantlib detail::get.
 
     References
     ----------

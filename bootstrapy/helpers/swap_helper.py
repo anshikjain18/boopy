@@ -45,19 +45,26 @@ class SwapHelper(InterestRateHelper):
         ratehelpers.hpp + cpp
         makevanillaswap.cpp
         """
-        vanilla_swap = self.vanilla_swap = MakeVanillaSwap(
+        make_vanilla_swap_class = MakeVanillaSwap(
             self.tenor, self.ibor_index, self.fwd_start, self.rate
         )
-        self.vanilla_swap.with_settlement_days = self.settlement_day
-        self.vanilla_swap.with_fixed_leg_day_count = self.day_count
-        self.vanilla_swap.with_fixed_leg_tenor = self.tenor
-        self.vanilla_swap.with_fixed_leg_convention = self.convention
-        self.vanilla_swap.with_fixed_leg_termination_date_convention = self.convention
-        self.vanilla_swap.with_fixed_leg_calendar = self.calendar
-        self.vanilla_swap.with_fixed_leg_end_of_month = self.end_of_month
-        self.vanilla_swap.with_floating_leg_calendar = self.calendar
-        self.vanilla_swap.with_floating_leg_end_of_month = self.end_of_month
-        self.vanilla_swap.with_indexed_coupons = self.use_indexed_coupons
+        # Below needs to be rewritten
+        make_vanilla_swap_class.with_fixed_leg_tenor(self.tenor)
+        make_vanilla_swap_class.with_settlement_days = self.settlement_day
+        make_vanilla_swap_class.with_fixed_leg_day_count = self.day_count
+        make_vanilla_swap_class.with_fixed_leg_tenor = self.tenor
+        make_vanilla_swap_class.with_fixed_leg_convention = self.convention
+        make_vanilla_swap_class.with_fixed_leg_termination_date_convention = (
+            self.convention
+        )
+        make_vanilla_swap_class.with_fixed_leg_calendar = self.calendar
+        make_vanilla_swap_class.with_fixed_leg_end_of_month = self.end_of_month
+        make_vanilla_swap_class.with_floating_leg_calendar = self.calendar
+        make_vanilla_swap_class.with_floating_leg_end_of_month = self.end_of_month
+        make_vanilla_swap_class.with_indexed_coupons = self.use_indexed_coupons
+        make_vanilla_swap_class.init_make_vanilla_swap()
+
+        vanilla_swap = make_vanilla_swap_class.make_vanilla_swap()
         return vanilla_swap
 
     def implied_quote(self) -> float:

@@ -3,8 +3,8 @@ import datetime
 from bootstrapy.cashflows.coupons import Coupon
 from bootstrapy.time.calendars.calendar import advance, adjust
 from bootstrapy.time.calendars.utils import convert_period, is_period
-from bootstrapy.time.frequency import Frequency
-from bootstrapy.interest_rate import InterestRate, simple
+from bootstrapy.time.frequency.frequency import Frequency
+from bootstrapy.interest_rate import InterestRate
 
 
 class FixedRateCoupon(Coupon):
@@ -52,8 +52,8 @@ class FixedRateLeg:
         self,
         rate: List[Union[int, float]],
         day_count: Callable,
-        compounding: Callable = simple,
-        frequency: Callable = Frequency.ANNUAL,
+        compounding: Callable = InterestRate.simple,
+        frequency: Callable = Frequency.ANNUAL.value,
     ) -> None:
         """
         Note there are three different version of this function for example one that takes vectors.

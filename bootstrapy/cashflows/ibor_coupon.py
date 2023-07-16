@@ -1,5 +1,5 @@
 from typing import Callable, Union, List
-from cash_flow_vectors import FloatingLeg
+from bootstrapy.cashflows.cash_flow_vectors import FloatingLeg
 
 
 class IborLeg:

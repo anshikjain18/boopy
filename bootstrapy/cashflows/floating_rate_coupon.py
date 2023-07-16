@@ -3,7 +3,7 @@ from bootstrapy.cashflows.coupons import Coupon
 import datetime
 
 
-class FloatingLeg(Coupon):
+class FloatingRateLeg(Coupon):
     def __init__(
         self,
         payment_date: datetime.date,
