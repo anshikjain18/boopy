@@ -106,7 +106,6 @@ class Schedule:
                     temp = advance(
                         seed, -tenor_length, tenor_unit, self.convention, True
                     )
-                    print(f"{temp = }")
                     if temp < exit_date:
                         statement_1 = self.first_date != None
                         if statement_1 == True:

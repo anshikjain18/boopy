@@ -13,12 +13,20 @@ class FixedRateCoupon(Coupon):
         payment_date,
         nominal,
         rate,
-        start_date,
-        end_date,
-        ref_date,
+        accrual_start_date,
+        accrual_end_date,
+        ref_period_start,
+        ref_period_end,
         ex_coupon_date,
     ):
-        raise NotImplementedError
+        self.payment_date = payment_date
+        self.nominal = nominal
+        self.rate = rate
+        self.accrual_start_date = accrual_start_date
+        self.accrual_end_date = accrual_end_date
+        self.ref_period_start = ref_period_start
+        self.ref_period_end = ref_period_end
+        self.ex_coupon_date = ex_coupon_date
 
 
 class FixedRateLeg:
@@ -92,6 +100,7 @@ class FixedRateLeg:
                 start_date,
                 end_date,
                 ref_date,
+                end_date,
                 ex_coupon_date,
             )
         )
@@ -121,7 +130,8 @@ class FixedRateLeg:
                     rate,
                     start_date,
                     end_date,
-                    ref_date,
+                    start_date,
+                    end_date,
                     ex_coupon_date,
                 )
             )
@@ -176,6 +186,7 @@ class FixedRateLeg:
                         rate,
                         start_date,
                         end_date,
+                        start_date,
                         ref_date,
                         ex_coupon_date,
                     )

@@ -20,6 +20,8 @@ class IborIndex:
         self.calendar = calendar
         self.convention = convention
         self.day_count = day_count
+        # Should be removed in the future to avoid confusiong
+        self.fixing_days = settlement_days
 
     def value_date(self, date: datetime.date) -> datetime.date:
         """

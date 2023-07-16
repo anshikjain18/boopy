@@ -70,12 +70,33 @@ def convert_period(period: str) -> Tuple[int, str]:
     return (length, timeunit)
 
 
-def add_period(date: datetime.date, period: str) -> datetime.date:
+def subtract_period(date: datetime.date, period: str) -> datetime.date:
     """
     In many cases we want to add the two values datetime.datetime(2023,2,4) and "3M" for example. Then
     we can call this function for that.
     """
     print(period)
+    if period == "0D":
+        return date
+    else:
+        time_unit = period[-1]
+        length = int(period[: len(period) - 1])
+        if time_unit == "D" or time_unit == "d":
+            return date - relativedelta(days=length)
+        elif time_unit == "W" or time_unit == "w":
+            return date - relativedelta(weeks=length)
+        elif time_unit == "M" or time_unit == "m":
+            return date - relativedelta(months=length)
+        elif time_unit == "Y" or time_unit == "y":
+            return date - relativedelta(years=length)
+        return date
+
+
+def add_period(date: datetime.date, period: str) -> datetime.date:
+    """
+    In many cases we want to add the two values datetime.datetime(2023,2,4) and "3M" for example. Then
+    we can call this function for that.
+    """
     if period == "0D":
         return date
     else:
