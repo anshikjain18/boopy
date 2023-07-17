@@ -40,7 +40,7 @@ class IborLeg:
             self._payment_adjustments,
             self._spreads,
             self._zero_payments,
-            self.ex_coupon_adjustment,
-            self.is_in_arrears,
+            self._ex_coupon_adjustment,
+            self._is_in_arrears,
             self._fixing_days,
         )

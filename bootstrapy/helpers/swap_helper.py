@@ -65,6 +65,7 @@ class SwapHelper(InterestRateHelper):
         make_vanilla_swap_class.init_make_vanilla_swap()
 
         vanilla_swap = make_vanilla_swap_class.make_vanilla_swap()
+
         return vanilla_swap
 
     def implied_quote(self) -> float:

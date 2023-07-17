@@ -52,6 +52,8 @@ def is_period(period: str) -> bool:
     ----------
     calendar.cpp
     """
+
+    period = period[-1]
     if period == "D" or period == "d":
         return True
     elif period == "W" or period == "w":

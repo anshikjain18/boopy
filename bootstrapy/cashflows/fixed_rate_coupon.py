@@ -35,7 +35,7 @@ class FixedRateLeg:
         fixed_schedule: Callable,
         payment_convention: Callable,
         payment_lag: int = 0,
-        ex_coupon_period: Union[str, None] = None,
+        ex_coupon_period: Union[str, None] = "0D",
     ):
         self.fixed_schedule = fixed_schedule
         self.notionals = None
@@ -46,7 +46,6 @@ class FixedRateLeg:
         self.ex_coupon_adjustment = "Following"
         self.ex_coupon_end_of_month = False
         self.leg = []
-        self.initialize()
 
     def with_coupon_rates(
         self,
@@ -84,7 +83,7 @@ class FixedRateLeg:
         if (
             (self.fixed_schedule.has_tenor == True)
             & (self.fixed_schedule.has_is_regular == True)
-            & (self.fixed_schedule.is_regular[1] != False)
+            & (self.fixed_schedule.is_regular[0] != False)
         ):
             tenor_length, tenor_unit = convert_period(self.fixed_schedule.tenor)
             ref_date = advance(
