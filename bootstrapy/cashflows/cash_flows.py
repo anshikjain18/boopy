@@ -18,3 +18,11 @@ class Cashflows:
             d = min(coupon.accrual_start_date, d)
 
         return d
+
+    @abstractmethod
+    def end_date(leg: Callable) -> datetime.date:
+        d = datetime.date(1, 1, 1)
+        for coupon in leg:
+            d = max(coupon.accrual_end_date, d)
+
+        return d

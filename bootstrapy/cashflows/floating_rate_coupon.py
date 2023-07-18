@@ -20,6 +20,16 @@ class FloatingRateLeg(Coupon):
         is_in_arrears: bool,
         ex_coupon_date: datetime.date,
     ):
+        super().__init__(
+            payment_date,
+            nominal,
+            start_date,
+            end_date,
+            ref_period_start,
+            ref_period_end,
+            ex_coupon_date,
+        )
+
         self.payment_date = payment_date
         self.nominal = nominal
         self.start_date = start_date
