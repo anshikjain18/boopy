@@ -21,6 +21,12 @@ class Cashflows:
 
     @abstractmethod
     def end_date(leg: Callable) -> datetime.date:
+        """
+        Calculates the last accrual start date of each coupon given a leg.
+        References
+        ----------
+        cashflows.cpp
+        """
         d = datetime.date(1, 1, 1)
         for coupon in leg:
             d = max(coupon.accrual_end_date, d)
