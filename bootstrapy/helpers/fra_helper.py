@@ -112,8 +112,9 @@ class FRAHelper(InterestRateHelper):
         if self.pillar == "last_relevant_date":
             self.pillar_date = self.latest_relevant_date
 
-    def implied_quote(self):
-        raise NotImplementedError
-
-
-#        return self.ibor_index.fixing(self.fixing_date)
+    def implied_quote(self, TermStructure: Callable):
+        """
+        Calculates the implied quote given a term structure. In terms of bootstrap this means that we will
+        guess the discount factors with a numerical solver as the forward rate converges to the market quote.
+        """
+        return self.ibor_index.forecast_fixing(TermStructure, self.fixing_date)

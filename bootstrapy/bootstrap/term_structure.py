@@ -1,31 +1,24 @@
-from typing import List, Type, Callable
-from bootstrapy.helpers.interest_rate_helper import InterestRateHelper
-from bootstrapy.time.date.maturity import time_from_reference
-from bisect import bisect_right
+from typing import Union, List, Callable, Type
 import datetime
+from bootstrapy.helpers.interest_rate_helper import InterestRateHelper
 import numpy as np
 from scipy import optimize
 from functools import partial
+from bisect import bisect_right
+
+from bootstrapy.time.date.maturity import time_from_reference
 
 
-class Bootstrap:
-    def __init__(
-        self,
-        instruments: List[Type[InterestRateHelper]],
-        day_counter: Callable[[int, int], float],
-    ):
-        self.instruments = instruments
+class TermStructure:
+    def __init__(self, helpers: Callable, day_counter: Callable):
+        self.zero_curve = [0] * (len(helpers) + 1)
         self.day_counter = day_counter
-        self.pillars = self._curve_pillars(instruments)
-
-        self.curve = [-1, -1, -1]  # len(self.pillars) * [0.5]
-
+        self.pillars = self._curve_pillars(helpers)
         # Interpolation
         self.x_begin = self.pillars
         self.x_end = self.pillars[-1]
-        self.y_begin = self.curve
-        # TODO: Temporary solution
-        self.s_ = (len(self.curve) + 1) * [0]
+        self.y_begin = self.zero_curve
+        self.s_ = (len(self.zero_curve) + 1) * [0]
 
     def _discount(self, d: datetime.time) -> float:
         """
@@ -42,25 +35,6 @@ class Bootstrap:
         t = self.day_counter(0, time_from_reference(None, d))
         r = self._value(t)
         return np.exp(-r * t)
-
-    # TODO: create a better solution for forecast_fixing, should be inside deposit_helper
-    def _forecast_fixing(self, d1: datetime.date, d2: datetime.date, t: float) -> float:
-        """
-        Calculates the forward rate using d1 and d2. t is the time between d1 and d2 using the instruments
-        day count convention.
-
-        References
-        ----------
-        Calls discountImpl which will return exp(-r*t). However first r is calculated through calling value from interpolation.
-            iborindex.hpp
-
-        Parameters
-        ----------
-
-        """
-        df_1 = self._discount(d1)
-        df_2 = self._discount(d2)
-        return (df_1 / df_2 - 1) / t
 
     def _curve_pillars(self, instruments: List[Type[InterestRateHelper]]) -> List[int]:
         """
@@ -149,61 +123,35 @@ class Bootstrap:
             # https://stackoverflow.com/a/37873955
             return bisect_right(self.pillars, x) - x_begin - 1
 
+
+class Bootstrap:
+    def __init__(
+        self,
+        helpers: List[Type[InterestRateHelper]],
+        day_counter: Callable[[int, int], float],
+    ):
+        self.helpers = helpers
+        self.day_counter = day_counter
+        self.term_structure = TermStructure(helpers, day_counter)
+
     def bootstrap_error(
         self,
         r: float,
-        instrument: Callable,
+        helper: Callable,
         segment: int,
         value_date: datetime.date,
         maturity_date: datetime.date,
         t: float,
     ) -> float:
-        self.curve[segment] = r
-        self.y_begin = self.curve
+        print(f"{self.term_structure.zero_curve = }")
+        self.term_structure.zero_curve[segment] = r
+        self.y_begin = self.term_structure.zero_curve
         if segment == 1:
-            self.curve[0] = self.curve[segment]
-        return instrument.quote - self._forecast_fixing(value_date, maturity_date, t)
-
-    def calculate_single(self):
-        """
-        When called will extend the curve pillar at a time with each new instrument.
-
-        Example
-        -------
-        Given the first instrument, a deposit. It will extend the curve with a single point.
-        Then for the next instrument, it will extend the curve with an additional point. Each
-        instrument forces the curve to call the solver and interpolate again.
-
-        Reference
-        ---------
-        iterativebootstrap.hpp
-
-        Parameters
-        ----------
-
-        """
-        # ? Replace below with a for loop
-        segment = (
-            1  # ! consider the zero rate to be equal to the zero rate at element 1
-        )
-        instrument = self.instruments[segment - 1]
-        value_date = instrument.value_date
-        maturity_date = instrument.maturity_date
-        t = instrument.year_fraction(value_date, maturity_date)
-        self._update()
-
-        pre_solve = partial(
-            self.bootstrap_error,
-            instrument=instrument,
-            segment=segment,
-            value_date=value_date,
-            maturity_date=maturity_date,
-            t=t,
-        )
-        optimize.root_scalar(
-            lambda r: pre_solve(r=r), bracket=[-10, 10], method="brentq"
-        )
-        return self.curve
+            # the first rate is always equivalent to the second value in a zero rate curve
+            self.term_structure.zero_curve[0] = self.term_structure.zero_curve[segment]
+        return helper.quote - helper.implied_quote(
+            self.term_structure
+        )  # self._forecast_fixing(value_date, maturity_date, t)
 
     def calculate(self):
         """
@@ -219,40 +167,23 @@ class Bootstrap:
         ---------
         iterativebootstrap.hpp
         """
-        # ? Replace below with a for loop
-        for segment in range(1, len(self.instruments) + 1):
-            print(f"{segment = }")
-            instrument = self.instruments[segment - 1]
-            value_date = instrument.value_date
-            maturity_date = instrument.maturity_date
-            print(f"{value_date = }")
-            print(f"{maturity_date = }")
-            t = instrument.year_fraction(value_date, maturity_date)
-            self._update()
+        for segment in range(1, len(self.helpers) + 1):
+            helper = self.helpers[segment - 1]
+            value_date = helper.value_date
+            maturity_date = helper.maturity_date
+            t = helper.year_fraction(value_date, maturity_date)
+            self.term_structure._update()
 
-            pre_solve = partial(
+            partial_error = partial(
                 self.bootstrap_error,
-                instrument=instrument,
+                helper=helper,
                 segment=segment,
                 value_date=value_date,
                 maturity_date=maturity_date,
                 t=t,
             )
             optimize.root_scalar(
-                lambda r: pre_solve(r=r), bracket=[-1, 1], method="brentq"
+                lambda r: partial_error(r=r), bracket=[-1, 1], method="brentq"
             )
-        print(f"{self.curve = }")
-        return self.curve
-
-    def _order_instruments(self):
-        """
-        Orders the given instrument list of classes based on their maturity days.
-
-        Parameters
-        ----------
-        instruments : List[Type[InterestRateHelper]]
-            A list of class instances of the instruments.
-
-        """
-
-        pass
+        print(f"{self.term_structure.zero_curve = }")
+        return self.term_structure.zero_curve
