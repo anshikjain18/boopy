@@ -80,6 +80,7 @@ class DepositHelper(InterestRateHelper):
         ----------
 
         """
+
         df_1 = TermStructure._discount(d1)
         df_2 = TermStructure._discount(d2)
         return (df_1 / df_2 - 1) / t

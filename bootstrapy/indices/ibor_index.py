@@ -94,9 +94,6 @@ class IborIndex:
         d1 = self.value_date(fixing_date)
         d2 = self.maturity_date(d1)
         t = self.year_fraction(d1, d2)
-        df_1 = TermStructure._discount(d1)
         df_2 = TermStructure._discount(d2)
-        print(f"{df_1 = }")
-        print(f"{df_2 = }")
-        print(f"{(df_1 / df_2 - 1) / t = }")
+        df_1 = TermStructure._discount(d1)
         return (df_1 / df_2 - 1) / t
