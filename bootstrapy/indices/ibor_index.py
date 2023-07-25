@@ -1,6 +1,7 @@
 from typing import Callable
 from bootstrapy.time.calendars.calendar import adjust, advance
 from bootstrapy.time.calendars.utils import year_fraction
+from bootstrapy.time.date.maturity import time_from_reference
 import datetime
 
 
@@ -22,6 +23,26 @@ class IborIndex:
         self.day_count = day_count
         # Should be removed in the future to avoid confusiong
         self.fixing_days = settlement_days
+
+    def year_fraction(self, d1: datetime.date | None, d2: datetime.date) -> float:
+        """
+        Calculates the year fraction. If d1 is equal to d1, then assume it will be the
+        year fraction using the reference date.
+
+        This class has now been moved to calendars utils.py. Move all references of this function.
+        Parameters
+        ----------
+
+        """
+
+        if d1 == None:
+            d1 = 0
+            d2_int = time_from_reference(None, d2)
+            return self.day_count(0, d2_int)
+        else:
+            d1_int = time_from_reference(None, d1)
+            d2_int = time_from_reference(None, d2)
+            return self.day_count(d1_int, d2_int)
 
     def value_date(self, date: datetime.date) -> datetime.date:
         """
@@ -54,8 +75,25 @@ class IborIndex:
         """
         return advance(date, -self.settlement_days, "D", self.convention)
 
-    def forecast_fixing(self, fixing_date: datetime.date) -> datetime.date:
+    def forecast_fixing(
+        self, TermStructure: Callable, fixing_date: datetime.date
+    ) -> float:
+        """
+        Calculates the forward rate using d1 and d2. t is the time between d1 and d2 using the instruments
+        day count convention.
+
+        References
+        ----------
+        Calls discountImpl which will return exp(-r*t). However first r is calculated through calling value from interpolation.
+            iborindex.hpp
+
+        Parameters
+        ----------
+
+        """
         d1 = self.value_date(fixing_date)
         d2 = self.maturity_date(d1)
-        t = year_fraction(d1, d2)
-        raise NotImplementedError
+        t = self.year_fraction(d1, d2)
+        df_2 = TermStructure._discount(d2)
+        df_1 = TermStructure._discount(d1)
+        return (df_1 / df_2 - 1) / t

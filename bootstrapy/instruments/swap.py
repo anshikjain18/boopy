@@ -1,7 +1,7 @@
 import datetime
 from abc import abstractmethod
 from typing import Callable, List
-from cashflows.cash_flows import Cashflows
+from bootstrapy.cashflows.cash_flows import Cashflows
 
 
 class Swap(object):
