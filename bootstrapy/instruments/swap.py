@@ -2,6 +2,29 @@ import datetime
 from abc import abstractmethod
 from typing import Callable, List
 from bootstrapy.cashflows.cash_flows import Cashflows
+from bootstrapy.instruments.instrument import InstrumentArguments, InstrumentResults
+
+
+class SwapArguments(InstrumentArguments):
+    def __init__(self):
+        super().__init__()
+        self.legs = None
+        self.payer = None
+
+
+class SwapResults(InstrumentResults):
+    def __init__(self):
+        super().__init__()
+        self.legNPV = None
+        self.legBPS = None
+        self.start_discount = None
+        self.end_discount = None
+        self.npv_date_discount = None
+
+
+class SwapEngine(SwapResults, SwapArguments):
+    def __init__(self):
+        super().__init__()
 
 
 class Swap(object):

@@ -91,33 +91,3 @@ class Bootstrap:
 
         self.term_structure.x = self.pillars
         self.term_structure.y = self.term_structure.zero_curve
-
-    def calculate_old(self):
-        """
-        When called will extend the curve pillar at a time with each new instrument.
-
-        Example
-        -------
-        Given the first instrument, a deposit. It will extend the curve with a single point.
-        Then for the next instrument, it will extend the curve with an additional point. Each
-        instrument forces the curve to call the solver and interpolate again.
-
-        Reference
-        ---------
-        iterativebootstrap.hpp
-        """
-        for segment in range(1, len(self.helpers) + 1):
-            helper = self.helpers[segment - 1]
-            self.term_structure._update()
-
-            print(f"{self.term_structure.zero_curve = }")
-            partial_error = partial(
-                self.bootstrap_error,
-                helper=helper,
-                segment=segment,
-            )
-            optimize.root_scalar(
-                lambda r: partial_error(r=r), bracket=[-1, 1], method="brentq"
-            )
-        print(f"{self.term_structure.zero_curve = }")
-        return self.term_structure.zero_curve
