@@ -83,7 +83,9 @@ class Bootstrap:
             optimize.root_scalar(
                 lambda r: partial_error(r=r), bracket=[-1, 1], method="brentq"
             )
-        return self.term_structure.zero_curve
+        return (
+            self.term_structure
+        )  # self.term_structure.zero_curve temporary for implementating swap discounting
 
     def initialize_interpolation(self, segment: int) -> None:
         self.term_structure.x_begin = 0

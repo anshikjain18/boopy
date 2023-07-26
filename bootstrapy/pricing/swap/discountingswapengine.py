@@ -4,12 +4,14 @@ import datetime
 from bootstrapy.instruments.swap import SwapEngine
 
 import bootstrapy.time.date.reference_date as reference_date_holder
+from bootstrapy.cashflows.cash_flows import Cashflows
 
 
 class DiscountingSwapEngine(SwapEngine):
     def __init__(
         self,
         term_structure: Callable,
+        vanilla_swap: Callable,
         include_settlement_date_flows: bool = None,
         settlement_date: datetime.date = None,
         npv_date: datetime.date = None,
@@ -18,6 +20,7 @@ class DiscountingSwapEngine(SwapEngine):
         self.include_settlement_date_flows = include_settlement_date_flows
         self.settlement_date = settlement_date
         self.npv_date = npv_date
+        self.vanilla_swap = vanilla_swap
 
     def calculate(self):
         self.value = 0
@@ -31,3 +34,18 @@ class DiscountingSwapEngine(SwapEngine):
         self.valuation_date = self.npv_date
         if self.npv_date is None:
             self.valuation_date = ref_date
+        self.npv_date_discount = self.term_structure._discount(self.valuation_date)
+        n = len(self.vanilla_swap.legs)
+        print(n)
+        self.legNPV = [0] * n
+        self.legBPS = [0] * n
+        self.start_discount = [0] * n
+        self.end_discount = [0] * n
+        for i in range(n):
+            self.legNPV[i], self.legBPS[i] = Cashflows.npvbps(
+                self.vanilla_swap,
+                self.term_structure,
+                False,
+                self.settlement_date,
+                self.npv_date,
+            )
