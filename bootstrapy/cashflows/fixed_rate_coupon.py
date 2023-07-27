@@ -28,6 +28,15 @@ class FixedRateCoupon(Coupon):
         self.ref_period_end = ref_period_end
         self.ex_coupon_date = ex_coupon_date
 
+    def amount(self) -> Union[float, int]:
+        """
+        Calculates the nominal multiplied with the rate that has compounded.
+        References
+        ----------
+        fixedratecoupon.cpp
+        """
+        return self.nominal * InterestRate.compound_factor(self.rate, self.accrual_start_date, self.accrual_end_date, self.)
+
 
 class FixedRateLeg:
     def __init__(
