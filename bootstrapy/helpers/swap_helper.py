@@ -4,6 +4,7 @@ from bootstrapy.time.calendars.calendar import advance, adjust
 from typing import Callable
 from bootstrapy.instruments.make_vanilla_swap import MakeVanillaSwap
 from bootstrapy.cashflows.cash_flows import Cashflows
+from bootstrapy.pricing.swap.discountingswapengine import DiscountingSwapEngine
 
 
 class SwapHelper(InterestRateHelper):
@@ -105,5 +106,9 @@ class SwapHelper(InterestRateHelper):
 
         return vanilla_swap
 
-    def implied_quote(self) -> float:
-        raise NotImplementedError
+    def implied_quote(self, term_structure: Callable) -> float:
+        engine = DiscountingSwapEngine(term_structure, self.vanilla_swap)
+        basis_point = 0.0001
+        floating_leg_npv = engine.legNPV[1]
+        result = floating_leg_npv / (engine.legBPS[0] / basis_point)
+        return result

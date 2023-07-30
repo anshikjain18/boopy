@@ -44,10 +44,13 @@ class Cashflows:
         npv_date: datetime.date,
     ) -> Tuple[Union[int, float]]:
         """
-        Calculates the
+        Calculates the Net Present Value, NPV, and Basis-Point Sensitivity, BPS. The NPV is the sum of the NPV of both legs and
+        BPS is the amount the NPV changes if the rate changes by one basis point.
+
         References
         ----------
         cashflows.cpp
+        https://quant.stackexchange.com/questions/20621/why-quantlib-computes-the-fixed-leg-swap-rate-by-this-formula
         """
         npv = 0
         bps = 0
@@ -61,7 +64,21 @@ class Cashflows:
             has_coupon_occurred = has_occurred(
                 settlement_date, coupon, include_settlement_date_flow
             )
+            print(f"{coupon = }")
             is_trading_ex_coupon = trading_ex_coupon(settlement_date, coupon)
             if (has_coupon_occurred is False) & (is_trading_ex_coupon is False):
-                df = term_structure.discount(coupon.payment_date)
-                npv = NotImplementedError  # issue is with day counter at cash flow.
+                df = term_structure._discount(coupon.payment_date)
+                # Need to seperate the fixed and floating as floating needs the term structure.
+                if type(coupon).__name__ == "FloatingRateLeg":
+                    npv += coupon.amount(term_structure) * df
+                else:
+                    npv += coupon.amount() * df
+
+                if coupon is not None:
+                    bps += coupon.nominal + coupon.accrual_period() * df
+
+        d = term_structure._discount(npv_date)
+        npv /= d
+        bps = 0.0001 * bps / d
+        print(f"{npv = }")
+        return npv, bps

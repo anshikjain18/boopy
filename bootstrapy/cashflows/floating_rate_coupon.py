@@ -43,3 +43,29 @@ class FloatingRateLeg(Coupon):
         self._day_counter = day_counter
         self._is_in_arrears = is_in_arrears
         self._ex_coupon_date = ex_coupon_date
+
+    def index_fixing(self, term_structure) -> Union[float, int]:
+        accrual_period = self._day_counter(
+            self.accrual_start_date, self.accrual_end_date, term_structure
+        )
+        return self._index.forecast_fixing(
+            self.accrual_start_date, self.accrual_end_date, accrual_period
+        )
+
+    def adjusted_fixing(self, term_structure) -> Union[float, int]:
+        return self.index_fixing(term_structure)
+
+    def accrual_period(self) -> Union[float, int]:
+        return self._day_counter(self.accrual_start_date, self.accrual_end_date)
+
+    def rate(self, term_structure) -> Union[float, int]:
+        """
+        Here rate is simplified in comparison to the QuantLib implementation.
+        """
+        return self._gearing * self._spread * self.adjusted_fixing(term_structure)
+
+    def amount(self, term_structure: Callable) -> Union[float, int]:
+        accrual_period = self._day_counter(
+            self.accrual_start_date, self.accrual_end_date
+        )
+        return self.nominal * accrual_period * self.rate(term_structure)

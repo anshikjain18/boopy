@@ -75,6 +75,17 @@ class IborIndex:
         """
         return advance(date, -self.settlement_days, "D", self.convention)
 
+    def forecast_fixing_with_dates(
+        self, d1: datetime.date, d2: datetime.date, term_structure: Callable
+    ) -> float:
+        """
+        Mimics the behavior of forecast_fixing but with the addition of dates as input
+        """
+        t = self.year_fraction(d1, d2)
+        df_2 = term_structure._discount(d2)
+        df_1 = term_structure._discount(d1)
+        return (df_1 / df_2 - 1) / t
+
     def forecast_fixing(
         self, TermStructure: Callable, fixing_date: datetime.date
     ) -> float:

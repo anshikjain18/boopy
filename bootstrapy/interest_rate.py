@@ -1,6 +1,7 @@
 from typing import Union, Callable
 import datetime
 from abc import abstractmethod
+import math
 
 
 class InterestRate:
@@ -8,7 +9,7 @@ class InterestRate:
         self,
         rate: Union[float, int],
         day_count: Callable,
-        compounding: Callable,
+        compounding: str,
         frequency: Callable,
     ):
         self.rate = rate
@@ -19,34 +20,38 @@ class InterestRate:
     def __len__(self):
         raise NotImplementedError
 
-    @abstractmethod
-    def simple(rate: Union[float, int], t: Union[float, int]) -> float:
-        return 1 + rate * t
-
-    @abstractmethod
     def year_fraction(
         self,
         accrual_start_date,
         accrual_end_date,
-        ref_period_start,
-        ref_period_end,
-        day_count,
     ) -> Union[float, int]:
-        return day_count(accrual_start_date, accrual_end_date)
+        """
+        ref_period_start and ref_period_end could be removed as they are not used. However, they exists as arguments in QuantLib.
+        """
+        return self.day_count(accrual_start_date, accrual_end_date)
 
-    @abstractmethod
-    def compound_factor(
-        rate: Union[float, int],
+    def compound_factor(self, time: datetime.date) -> Union[float, int]:
+        """
+        Calculates the compounding factor given just a date.
+        """
+        if (self.compounding is None) or (self.compounding not in ["Simple"]):
+            raise ValueError("Compounding")
+        match self.compounding:
+            case "Simple":
+                return 1.0 + self.rate * time
+            case "Continuous":
+                return math.exp(self.rate * time)
+
+    def compound_factor_accrual(
+        self,
         accrual_start_date: datetime.date,
         accrual_end_date: datetime.date,
-        day_count: Callable,
-        ref_period_start: datetime.date = None,
-        ref_period_end: datetime.date = None,
     ):
-        time = InterestRate.year_fraction(
+        """
+        Calculates the compounding factor given the accrual start and end date.
+        """
+        time = self.year_fraction(
             accrual_start_date,
             accrual_end_date,
-            ref_period_start,
-            ref_period_end,
-            day_count,
         )
+        return self.compound_factor(time)

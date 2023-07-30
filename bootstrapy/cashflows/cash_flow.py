@@ -25,7 +25,7 @@ def has_occurred(
 
 def trading_ex_coupon(ref_date: datetime.date, coupon: Callable) -> bool:
     ecd = coupon.ex_coupon_date
-    if isinstance(ecd, datetime.date):
+    if ecd is None:
         return False
 
     if isinstance(ref_date, datetime.date):

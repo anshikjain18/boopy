@@ -28,6 +28,12 @@ class FixedRateCoupon(Coupon):
         self.ref_period_end = ref_period_end
         self.ex_coupon_date = ex_coupon_date
 
+    def accrual_period(self) -> Union[float, int]:
+        """
+        The return function should instead call the day counter class.
+        """
+        return self.rate.year_fraction(self.accrual_start_date, self.accrual_end_date)
+
     def amount(self) -> Union[float, int]:
         """
         Calculates the nominal multiplied with the rate that has compounded.
@@ -35,7 +41,12 @@ class FixedRateCoupon(Coupon):
         ----------
         fixedratecoupon.cpp
         """
-        return self.nominal * InterestRate.compound_factor(self.rate, self.accrual_start_date, self.accrual_end_date, self.)
+        return self.nominal * (
+            self.rate.compound_factor_accrual(
+                self.accrual_start_date, self.accrual_end_date
+            )
+            - 1
+        )
 
 
 class FixedRateLeg:
@@ -60,7 +71,7 @@ class FixedRateLeg:
         self,
         rate: List[Union[int, float]],
         day_count: Callable,
-        compounding: Callable = InterestRate.simple,
+        compounding: str = "Simple",
         frequency: Callable = Frequency.ANNUAL.value,
     ) -> None:
         """

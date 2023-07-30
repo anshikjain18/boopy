@@ -1,6 +1,7 @@
 from bootstrapy.time.calendars.sweden import sweden_is_business_day
 import datetime
 from dateutil.relativedelta import relativedelta
+from bootstrapy.time.calendars.utils import str_to_datetime
 import bootstrapy.time.date.reference_date as reference_date_holder
 
 
@@ -61,6 +62,9 @@ def maturity_int(reference_date: datetime.date, maturity_date: datetime.date) ->
 
 def time_from_reference(d1: datetime.date | None, d2: datetime.date) -> int:
     if d1 == None:
-        return (d2 - reference_date_holder.reference_date).days
+        ref_date = reference_date_holder.reference_date
+        if isinstance(ref_date, str):
+            ref_date = str_to_datetime(ref_date)
+        return (d2 - ref_date).days
     else:
         return (d2 - d1).days
