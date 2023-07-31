@@ -26,7 +26,7 @@ class DiscountingSwapEngine(SwapEngine):
         self.value = 0
         self.error_estimate = None
         self.payer = [-1, 1]
-        ref_date = str_to_datetime(reference_date_holder.reference_date)
+        ref_date = reference_date_holder.reference_date
 
         if self.settlement_date is None:
             self.settlement_date = ref_date

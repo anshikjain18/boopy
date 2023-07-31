@@ -65,9 +65,9 @@ class MakeVanillaSwap:
         """
 
         if self.with_effective_date != None:
-            start_date = str_to_datetime(self.with_effective_date)
+            start_date = self.with_effective_date
         else:
-            ref_date = str_to_datetime(reference_date_holder.reference_date)
+            ref_date = reference_date_holder.reference_date
             ref_date = adjust(
                 ref_date, self.ibor_index.convention
             )  # Should be floating leg calendar as the legs can have different calendars.

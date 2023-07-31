@@ -64,7 +64,6 @@ class Cashflows:
             has_coupon_occurred = has_occurred(
                 settlement_date, coupon, include_settlement_date_flow
             )
-            print(f"{coupon = }")
             is_trading_ex_coupon = trading_ex_coupon(settlement_date, coupon)
             if (has_coupon_occurred is False) & (is_trading_ex_coupon is False):
                 df = term_structure._discount(coupon.payment_date)
@@ -73,12 +72,10 @@ class Cashflows:
                     npv += coupon.amount(term_structure) * df
                 else:
                     npv += coupon.amount() * df
-
                 if coupon is not None:
                     bps += coupon.nominal + coupon.accrual_period() * df
 
         d = term_structure._discount(npv_date)
         npv /= d
         bps = 0.0001 * bps / d
-        print(f"{npv = }")
         return npv, bps

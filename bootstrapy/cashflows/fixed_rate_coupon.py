@@ -41,6 +41,7 @@ class FixedRateCoupon(Coupon):
         ----------
         fixedratecoupon.cpp
         """
+
         return self.nominal * (
             self.rate.compound_factor_accrual(
                 self.accrual_start_date, self.accrual_end_date
@@ -82,7 +83,7 @@ class FixedRateLeg:
         fixedratecoupon.cpp
         """
         coupon_rates = [0]
-        coupon_rates[0] = InterestRate(rate, day_count, compounding, frequency)
+        coupon_rates[0] = InterestRate(0, day_count, compounding, frequency)
         self.coupon_rates = coupon_rates
 
     def with_notionals(self, notional: Union[float, int]) -> None:

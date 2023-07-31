@@ -35,7 +35,7 @@ def FloatingLeg(
     payment_lag=0,
     ex_coupon_period="0D",
     gearings: List = None,
-    ex_coupon_date: datetime.date = datetime.date(1900, 1, 1),
+    ex_coupon_date: datetime.date = None,
 ):
     n = len(schedule) - 1
     leg = [0] * n

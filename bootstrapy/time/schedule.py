@@ -62,7 +62,6 @@ class Schedule:
                 raise NotImplementedError
             else:
                 raise NotImplementedError
-        print(self.tenor)
         tenor_length, tenor_unit = convert_period(self.tenor)
 
         if tenor_length == 0:

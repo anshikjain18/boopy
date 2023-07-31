@@ -77,7 +77,6 @@ def subtract_period(date: datetime.date, period: str) -> datetime.date:
     In many cases we want to add the two values datetime.datetime(2023,2,4) and "3M" for example. Then
     we can call this function for that.
     """
-    print(period)
     if period == "0D":
         return date
     else:
