@@ -73,8 +73,7 @@ class Cashflows:
                 else:
                     npv += coupon.amount() * df
                 if coupon is not None:
-                    bps += coupon.nominal + coupon.accrual_period() * df
-
+                    bps += coupon.nominal * coupon.accrual_period() * df
         d = term_structure._discount(npv_date)
         npv /= d
         bps = 0.0001 * bps / d

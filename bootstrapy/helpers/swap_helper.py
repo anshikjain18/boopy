@@ -96,8 +96,5 @@ class SwapHelper(InterestRateHelper):
         engine.calculate()
         basis_point = 0.0001
         floating_leg_npv = engine.legNPV[1]
-        print(f"{-floating_leg_npv = }")
-        print(f"{engine.legBPS[0] = }")
         result = -floating_leg_npv / (engine.legBPS[0] / basis_point)
-        print(f"{result = }")
         return result
