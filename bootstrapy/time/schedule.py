@@ -138,5 +138,5 @@ class Schedule:
         else:
             if self.rule != "old_cds":
                 self.dates[0] = adjust(self.dates[0], self.convention)
-            for i in range(1, len(self.dates) - 1):
+            for i in range(1, len(self.dates)):
                 self.dates[i] = adjust(self.dates[i], self.convention)

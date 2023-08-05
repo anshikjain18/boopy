@@ -16,14 +16,17 @@ class Bootstrap:
     ):
         self.helpers = helpers
         self.day_counter = day_counter
-        self.maturity_days = [0]
-        self.pillars = self._curve_pillars(helpers)
+        (
+            self.pillars_ref,
+            self.pillars_daycount,
+            self.pillars_date,
+        ) = self._curve_pillars(helpers)
         self.term_structure = TermStructure(helpers, day_counter)
         self.boolean = True
 
     def _curve_pillars(self, instruments: List[Type[InterestRateHelper]]) -> List[int]:
         """
-        Fetches the maturity days of the instruments and also inserts the reference date into a list.
+        Fetches the maturity days of the instruments.
 
         Parameters
         ----------
@@ -31,15 +34,19 @@ class Bootstrap:
             A list of class instances of the instruments.
 
         """
-        pillars = [0] * (len(instruments) + 1)
-        pillars[0] = 0  # Consider the reference date
+        # Note the reference date, thus + 1
+        pillars_daycount = [0] * (len(instruments) + 1)
+        pillars_ref = [0] * (len(instruments) + 1)
+        pillars_date = [0] * (len(instruments) + 1)
+        pillars_date[0] = reference_date_holder.reference_date
         for i, instrument in enumerate(instruments):
-            i += 1
+            i += 1  # avoid reference date
             pillar = instrument.pillar_date
             maturity_days = maturity_int(reference_date_holder.reference_date, pillar)
-            self.maturity_days.append(maturity_days)
-            pillars[i] = self.day_counter(pillars[0], maturity_days)
-        return pillars
+            pillars_ref[i] = maturity_days
+            pillars_daycount[i] = self.day_counter(pillars_daycount[0], maturity_days)
+            pillars_date[i] = instrument.pillar_date
+        return pillars_ref, pillars_daycount, pillars_date
 
     def bootstrap_error(
         self,
@@ -53,9 +60,7 @@ class Bootstrap:
             self.term_structure.zero_curve[0] = self.term_structure.zero_curve[segment]
 
         self.term_structure._update()
-        return helper.quote - helper.implied_quote(
-            self.term_structure
-        )  # self._forecast_fixing(value_date, maturity_date, t)
+        return helper.quote - helper.implied_quote(self.term_structure)
 
     def calculate(self):
         """
@@ -83,13 +88,11 @@ class Bootstrap:
             optimize.root_scalar(
                 lambda r: partial_error(r=r), bracket=[-1, 1], method="brentq"
             )
-        return (
-            self.term_structure
-        )  # self.term_structure.zero_curve temporary for implementating swap discounting
+        return self.term_structure
 
     def initialize_interpolation(self, segment: int) -> None:
         self.term_structure.x_begin = 0
         self.term_structure.x_end = self.term_structure.x_begin + segment + 1
 
-        self.term_structure.x = self.pillars
+        self.term_structure.x = self.pillars_daycount
         self.term_structure.y = self.term_structure.zero_curve

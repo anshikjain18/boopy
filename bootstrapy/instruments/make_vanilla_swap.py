@@ -94,6 +94,7 @@ class MakeVanillaSwap:
                 end_date = add_period(start_date, self.tenor)
 
         # Creates the schedules for the coupons
+        print(f"{self._fixed_tenor = }")
         self.fixed_schedule = Schedule(
             start_date,
             end_date,
