@@ -1,0 +1,28 @@
+# .readthedocs.yml
+# Read the Docs configuration file
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+# Required
+version: 2
+
+# Don't publish the docs if there are any warnings, as they might be relevant
+# https://github.com/readthedocs/readthedocs.org/issues/6837#issuecomment-607229633
+sphinx:
+  fail_on_warning: true
+
+# Formats of the documentation to be built
+formats:
+  - htmlzip
+  - pdf
+
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3"
+
+python:
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - doc
