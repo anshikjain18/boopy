@@ -1,10 +1,13 @@
+LICENSE.txt
 README.md
+README.rst
 setup.py
 boopy/__init__.py
 boopy/interest_rate.py
 boopy.egg-info/PKG-INFO
 boopy.egg-info/SOURCES.txt
 boopy.egg-info/dependency_links.txt
+boopy.egg-info/requires.txt
 boopy.egg-info/top_level.txt
 boopy/helpers/__init__.py
 boopy/helpers/deposit_helper.py
