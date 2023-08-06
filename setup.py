@@ -8,7 +8,7 @@ with io.open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 setuptools.setup(
     name="boopy",
-    version="0.1",
+    version="0.1.1",
     author="Xiar Fatah",
     author_email="xiar.fatah@gmail.com",
     description="An educational package for construction of fixed income yield curves.",
