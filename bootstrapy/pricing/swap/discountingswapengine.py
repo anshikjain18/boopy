@@ -48,6 +48,4 @@ class DiscountingSwapEngine(SwapEngine):
             )
             self.legNPV[i] *= self.payer[i]
             self.legBPS[i] *= self.payer[i]
-        print(f"{self.legNPV = }")
-        print(f"{self.legBPS = }")
         self.value += self.legNPV[i]

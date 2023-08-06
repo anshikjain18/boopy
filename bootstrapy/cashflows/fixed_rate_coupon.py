@@ -2,12 +2,16 @@ from typing import Callable, Union, List
 import datetime
 from bootstrapy.cashflows.coupons import Coupon
 from bootstrapy.time.calendars.calendar import advance, adjust
-from bootstrapy.time.calendars.utils import convert_period, is_period
-from bootstrapy.time.frequency.frequency import Frequency
+from bootstrapy.time.calendars.utils import convert_period, is_period, multiply_period
+from bootstrapy.time.frequency import Frequency
 from bootstrapy.interest_rate import InterestRate
 
 
 class FixedRateCoupon(Coupon):
+    """
+    Class for fixed rate coupons. Is called by the FixedRateLeg class when coupons are generated.
+    """
+
     def __init__(
         self,
         payment_date,
@@ -51,6 +55,10 @@ class FixedRateCoupon(Coupon):
 
 
 class FixedRateLeg:
+    """
+    Generates the coupons for a fixed rate leg.
+    """
+
     def __init__(
         self,
         fixed_schedule: Callable,
@@ -77,7 +85,7 @@ class FixedRateLeg:
     ) -> None:
         """
         Note there are three different version of this function for example one that takes vectors.
-        Thus this one will always keep coupon_rates size to 1.
+        Thus this one will always keep coupon_rates size to 1. Sets the rate for the fixed leg.
         References
         ----------
         fixedratecoupon.cpp
@@ -90,6 +98,13 @@ class FixedRateLeg:
         self.notionals = [notional]
 
     def initialize(self):
+        """
+        Generates the coupons for the fixed rate leg by using the dates given by the Schedule class. The method is structure such as three cases are
+        considered.
+        - First coupon is added to the fixed leg.
+        - All coupons with the expection of the last one is added to the fixed leg.
+        - The last coupon is added to the fixed leg.
+        """
         start_date = self.fixed_schedule.dates[0]
         end_date = self.fixed_schedule.dates[1]
         payment_date = advance(end_date, self.payment_lag, "D", self.payment_convention)
@@ -97,6 +112,7 @@ class FixedRateLeg:
         nominal = self.notionals[0]
         ex_coupon_date = None
         leg = []
+        # Preparing the first coupon.
         if is_period(self.ex_coupon_period) != True:
             ex_coupon_date = advance(
                 payment_date, -self.ex_coupon_period, self.ex_coupon_adjustment
@@ -112,6 +128,7 @@ class FixedRateLeg:
             )
         else:
             ref_date = start_date
+
         leg.append(
             FixedRateCoupon(
                 payment_date,
@@ -124,7 +141,7 @@ class FixedRateLeg:
                 ex_coupon_date,
             )
         )
-
+        # Preparing the rest of the coupons.
         for i in range(2, len(self.fixed_schedule) - 1):
             start_date = end_date
             end_date = self.fixed_schedule.dates[i]
@@ -132,8 +149,13 @@ class FixedRateLeg:
                 end_date, self.payment_lag, "D", self.payment_convention
             )
             if is_period(self.ex_coupon_period):
+                ex_coupon_period = multiply_period(-1, self.ex_coupon_period)
+                length, period = convert_period(ex_coupon_period)
                 ex_coupon_date = advance(
-                    payment_date, -self.ex_coupon_period, self.ex_coupon_adjustment
+                    payment_date,
+                    length,
+                    period,
+                    self.ex_coupon_adjustment,
                 )
             if (i - 1) < len(self.coupon_rates):
                 rate = self.coupon_rates[i - 1]
@@ -158,13 +180,18 @@ class FixedRateLeg:
         if len(self.fixed_schedule) > 2:
             N = len(self.fixed_schedule)
             start_date = end_date
-            end_date = self.fixed_schedule.dates[i]
+            end_date = self.fixed_schedule.dates[N - 1]
             payment_date = advance(
                 end_date, self.payment_lag, "D", self.payment_convention
             )
             if is_period(self.ex_coupon_period):
+                ex_coupon_period = multiply_period(-1, self.ex_coupon_period)
+                length, period = convert_period(ex_coupon_period)
                 ex_coupon_date = advance(
-                    payment_date, -self.ex_coupon_period, self.ex_coupon_adjustment
+                    payment_date,
+                    length,
+                    period,
+                    self.ex_coupon_adjustment,
                 )
             if (N - 1) < len(self.coupon_rates):
                 rate = self.coupon_rates[N - 2]

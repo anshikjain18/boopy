@@ -4,6 +4,7 @@ from bootstrapy.time.schedule import Schedule
 import bootstrapy.time.date.reference_date as reference_date_holder
 from bootstrapy.time.calendars.calendar import advance, adjust
 from bootstrapy.time.calendars.utils import str_to_datetime, add_period
+from bootstrapy.time.period import Period
 
 
 class MakeVanillaSwap:
@@ -52,7 +53,7 @@ class MakeVanillaSwap:
         self.float_schedule = None
 
     def with_fixed_leg_tenor(self, tenor):
-        self._fixed_tenor = tenor
+        self._fixed_tenor = Period(tenor).period
 
     # Bad naming convention, should be fixed in the future.
     def init_make_vanilla_swap(self) -> None:
@@ -89,12 +90,9 @@ class MakeVanillaSwap:
         if end_date == None:
             if self.with_floating_leg_end_of_month:
                 raise NotImplementedError
-                # end_date = adjust(self.start_date, self.tenor, 'ModifiedFollowing', )
             else:
                 end_date = add_period(start_date, self.tenor)
 
-        # Creates the schedules for the coupons
-        print(f"{self._fixed_tenor = }")
         self.fixed_schedule = Schedule(
             start_date,
             end_date,
@@ -107,7 +105,6 @@ class MakeVanillaSwap:
             self.fixed_first_date,
             self.fixed_next_to_last_date,
         )
-        # Revisit and rewrite properly
         self.float_schedule = Schedule(
             start_date,
             end_date,

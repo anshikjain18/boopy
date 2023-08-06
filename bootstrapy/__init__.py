@@ -13,4 +13,4 @@ from bootstrapy.indices.ibor_index import IborIndex
 from bootstrapy.time.daycounters.daycounters import ACT360, ACT365
 
 # Frequency
-from bootstrapy.time.frequency.frequency import Frequency
+from bootstrapy.time.frequency import Frequency

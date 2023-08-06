@@ -72,10 +72,9 @@ class SwapHelper(InterestRateHelper):
             self.tenor, self.ibor_index, self.fwd_start, self.rate
         )
         # Below needs to be rewritten
-        make_vanilla_swap_class.with_fixed_leg_tenor(self.tenor)
         make_vanilla_swap_class.with_settlement_days = self.settlement_day
         make_vanilla_swap_class.with_fixed_leg_day_count = self.day_count
-        make_vanilla_swap_class.with_fixed_leg_tenor = self.tenor
+        make_vanilla_swap_class.with_fixed_leg_tenor(self.frequency)
         make_vanilla_swap_class.with_fixed_leg_convention = self.convention
         make_vanilla_swap_class.with_fixed_leg_termination_date_convention = (
             self.convention
