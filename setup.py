@@ -6,5 +6,6 @@ setuptools.setup(
      author="Xiar Fatah",
      author_email="xiar.fatah@gmail.com",
      url="https://github.com/Xiar-fatah/bootstrapy",
-     packages=setuptools.find_packages()
+     packages=setuptools.find_packages(where="bootstrapy")
+     python_requires = ">=3.10"
  )
