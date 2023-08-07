@@ -17,5 +17,5 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
     keywords="term structure, bootstrapping, yield curves, finance",
-    install_requires=["dateutil>=2.8.2"],
+    install_requires=["dateutil=2.8.2"],
 )
