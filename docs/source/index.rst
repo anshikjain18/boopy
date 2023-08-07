@@ -1,13 +1,17 @@
-Welcome to Lumache's documentation!
+Welcome to BooPy's documentation!
 ===================================
 
-**Lumache** (/lu'make/) is a Python library for cooks and food lovers
-that creates recipes mixing random ingredients.
-It pulls data from the `Open Food Facts database <https://world.openfoodfacts.org/>`_
-and offers a *simple* and *intuitive* API.
+**BooPy**  
+BooPy is an educational Python package meant to be used to create term structures for fixed income products. It is written in pure Python with considerably inspiration from the c++ package QuantLib. This is done to allow newcomers of the fixed income world to easier digest the underlying code of QuantLib without needed to learn c++.
 
-Check out the :doc:`usage` section for further information, including
-how to :ref:`installation` the project.
+As of now only linear interpolation is available and the following instruments are implemented
+- Deposits
+- Forward Rate Agreements
+- Swaps
+and it is an ongoing work to implement more!
+
+Check out the :doc:`example` section for further information, including
+how to :ref:`quickstart` the project.
 
 .. note::
 
