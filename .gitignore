@@ -1,2 +1,9 @@
-*.vscode
-*.DS_Store
+# IDE settings
+.vscode/
+.idea/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Custom
+*DS_Store
