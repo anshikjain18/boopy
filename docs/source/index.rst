@@ -10,9 +10,6 @@ As of now only linear interpolation is available and the following instruments a
 - Swaps
 and it is an ongoing work to implement more!
 
-Check out the :doc:`example` section for further information, including
-how to :ref:`quickstart` the project.
-
 .. note::
 
    This project is under active development.
