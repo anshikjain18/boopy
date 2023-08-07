@@ -17,6 +17,7 @@ Contents
 --------
 
 .. toctree::
-   usage
-   api
    quickstart
+   helpers
+   bootstrap
+   example
