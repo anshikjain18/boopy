@@ -9,6 +9,12 @@ import datetime
 
 
 class DepositHelper(InterestRateHelper):
+    r"""
+    DepositHelper.
+
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl
+    """
+
     def __init__(
         self,
         maturity_input: str,
