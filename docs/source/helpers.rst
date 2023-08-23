@@ -1,4 +1,4 @@
-Getting started
+Helpers
 ===============
 
 Installation

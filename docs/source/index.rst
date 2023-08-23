@@ -14,6 +14,10 @@ and it is an ongoing work to implement more!
 
    This project is under active development.
 
+See also
+--------
+* `QuantLib <https://github.com/lballabio/QuantLib>`_
+
 Contents
 --------
 
