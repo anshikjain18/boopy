@@ -9,6 +9,8 @@ import datetime
 
 
 class DepositHelper(InterestRateHelper):
+    "test"
+
     def __init__(
         self,
         maturity_input: str,
